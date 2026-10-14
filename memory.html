@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4Rs 記憶寶庫：大腦總部終極控制台</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Fredoka', 'Noto Sans TC', 'sans-serif'],
+                    },
+                    colors: {
+                        joy: '#FFE853',
+                        sadness: '#4DA8FF',
+                        disgust: '#5BE38A',
+                        courage: '#B163FF',
+                        consoleBg: 'rgba(20, 24, 60, 0.75)',
+                    },
+                    boxShadow: {
+                        'joy-glow': '0 0 25px rgba(255, 232, 83, 0.8), inset 0 0 15px rgba(255, 255, 255, 0.8)',
+                        'sadness-glow': '0 0 25px rgba(77, 168, 255, 0.8), inset 0 0 15px rgba(255, 255, 255, 0.8)',
+                        'disgust-glow': '0 0 25px rgba(91, 227, 138, 0.8), inset 0 0 15px rgba(255, 255, 255, 0.8)',
+                        'courage-glow': '0 0 25px rgba(177, 99, 255, 0.8), inset 0 0 15px rgba(255, 255, 255, 0.8)',
+                        'rainbow-glow': '0 0 40px rgba(255, 255, 255, 0.9), 0 0 80px rgba(255, 215, 0, 0.6)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background: radial-gradient(circle at center, #1b1340 0%, #0c0824 70%, #050312 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        /* Glassmorphism Card Style */
+        .glass-panel {
+            background: rgba(25, 28, 68, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .glass-btn {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            transition: all 0.2s ease-in-out;
+        }
+        .glass-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+        }
+        .glass-btn:active {
+            transform: translateY(1px);
+        }
+
+        /* Keypad Special Buttons */
+        .btn-clear {
+            background: rgba(239, 68, 68, 0.25);
+            border-color: rgba(239, 68, 68, 0.4);
+        }
+        .btn-clear:hover {
+            background: rgba(239, 68, 68, 0.45);
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+        .btn-submit:hover {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.6);
+        }
+
+        /* Memory Orb Floating Animation */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(3deg); }
+        }
+        .animate-float {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { filter: brightness(1) drop-shadow(0 0 10px rgba(255,255,255,0.4)); }
+            50% { filter: brightness(1.25) drop-shadow(0 0 22px rgba(255,255,255,0.8)); }
+        }
+        .animate-pulse-glow {
+            animation: pulse-glow 2.5s infinite ease-in-out;
+        }
+
+        /* Shake animation for wrong passcode */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-12px); }
+            40%, 80% { transform: translateX(12px); }
+        }
+        .animate-shake {
+            animation: shake 0.5s ease-in-out;
+            border-color: #ef4444 !important;
+            box-shadow: 0 0 25px rgba(239, 68, 68, 0.7) !important;
+        }
+
+        /* Core Memory Orb Internal Swirl Effect */
+        .orb-inner {
+            background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.1) 40%, transparent 80%);
+        }
+
+        /* Starry Canvas */
+        #starCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+    </style>
+</head>
+<body class="text-white flex flex-col min-h-screen justify-between relative overflow-x-hidden select-none">
+
+    <!-- Starry Background Canvas -->
+    <canvas id="starCanvas"></canvas>
+
+    <!-- Top Bar Navigation & Sound Toggle -->
+    <header class="relative z-10 w-full p-4 flex justify-between items-center max-w-6xl mx-auto">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-500 to-indigo-400 p-0.5 shadow-lg">
+                <div class="w-full h-full bg-slate-900 rounded-full flex items-center justify-center">
+                    <i class="fa-solid font-bold text-yellow-300 fa-brain text-xl"></i>
+                </div>
+            </div>
+            <div>
+                <h2 class="text-xs text-indigo-300 font-semibold tracking-wider">深水埔街坊福利會小學</h2>
+                <h1 class="text-sm md:text-base font-bold text-white tracking-wide">4Rs 能量大冒險：記憶寶庫</h1>
+            </div>
+        </div>
+
+        <!-- Audio Switcher -->
+        <button id="soundToggle" onclick="toggleSound()" class="glass-btn px-4 py-2 rounded-full flex items-center space-x-2 text-xs md:text-sm text-yellow-300 font-semibold hover:text-white">
+            <i id="soundIcon" class="fa-solid fa-volume-high text-lg"></i>
+            <span id="soundText">音效：開啟</span>
+        </button>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="relative z-10 max-w-4xl w-full mx-auto px-4 py-2 flex-grow flex flex-col justify-center items-center">
+
+        <!-- Title Section -->
+        <div class="text-center mb-6 space-y-2">
+            <div class="inline-block px-4 py-1 rounded-full bg-indigo-900/60 border border-indigo-400/30 text-indigo-200 text-xs md:text-sm font-medium mb-1">
+                關底終極主控台 (The Grand Console)
+            </div>
+            <h1 class="text-2xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-pink-200 to-cyan-200 drop-shadow-md">
+                4Rs 記憶寶庫：大腦總部終極控制台 💡
+            </h1>
+            <p class="text-indigo-200 text-xs md:text-base max-w-lg mx-auto">
+                請輸入四個關卡獲得的能量密碼，解鎖記憶寶庫！
+            </p>
+        </div>
+
+        <!-- 4 Core Memory Orbs Slots -->
+        <div class="grid grid-cols-4 gap-3 md:gap-8 w-full max-w-2xl mb-8">
+            <!-- Orb 1: Rest -->
+            <div onclick="openOrbModal('rest')" class="cursor-pointer group flex flex-col items-center">
+                <div id="orb-0" class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full border-2 border-dashed border-yellow-300/40 bg-slate-900/50 flex items-center justify-center transition-all duration-500 relative overflow-hidden group-hover:scale-105">
+                    <div class="orb-inner absolute inset-0 rounded-full opacity-60"></div>
+                    <i id="orb-icon-0" class="fa-solid fa-bed text-2xl text-yellow-500/40 transition-all duration-300"></i>
+                    <!-- Glow Overlay -->
+                    <div id="orb-glow-0" class="absolute inset-0 rounded-full bg-joy opacity-0 transition-opacity duration-500 flex items-center justify-center shadow-joy-glow">
+                        <i class="fa-solid fa-sun text-2xl md:text-3xl text-slate-900 animate-spin" style="animation-duration: 12s;"></i>
+                    </div>
+                </div>
+                <span class="mt-2 text-xs md:text-sm font-bold text-yellow-300 tracking-wider">Rest 休息</span>
+                <span class="text-[10px] text-indigo-300">關卡 1</span>
+            </div>
+
+            <!-- Orb 2: Relaxation -->
+            <div onclick="openOrbModal('relaxation')" class="cursor-pointer group flex flex-col items-center">
+                <div id="orb-1" class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full border-2 border-dashed border-blue-400/40 bg-slate-900/50 flex items-center justify-center transition-all duration-500 relative overflow-hidden group-hover:scale-105">
+                    <div class="orb-inner absolute inset-0 rounded-full opacity-60"></div>
+                    <i id="orb-icon-1" class="fa-solid fa-spa text-2xl text-blue-400/40 transition-all duration-300"></i>
+                    <!-- Glow Overlay -->
+                    <div id="orb-glow-1" class="absolute inset-0 rounded-full bg-sadness opacity-0 transition-opacity duration-500 flex items-center justify-center shadow-sadness-glow">
+                        <i class="fa-solid fa-wind text-2xl md:text-3xl text-slate-900 animate-pulse"></i>
+                    </div>
+                </div>
+                <span class="mt-2 text-xs md:text-sm font-bold text-blue-300 tracking-wider">Relaxation 放鬆</span>
+                <span class="text-[10px] text-indigo-300">關卡 2</span>
+            </div>
+
+            <!-- Orb 3: Relationship -->
+            <div onclick="openOrbModal('relationship')" class="cursor-pointer group flex flex-col items-center">
+                <div id="orb-2" class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full border-2 border-dashed border-emerald-400/40 bg-slate-900/50 flex items-center justify-center transition-all duration-500 relative overflow-hidden group-hover:scale-105">
+                    <div class="orb-inner absolute inset-0 rounded-full opacity-60"></div>
+                    <i id="orb-icon-2" class="fa-solid fa-users text-2xl text-emerald-400/40 transition-all duration-300"></i>
+                    <!-- Glow Overlay -->
+                    <div id="orb-glow-2" class="absolute inset-0 rounded-full bg-disgust opacity-0 transition-opacity duration-500 flex items-center justify-center shadow-disgust-glow">
+                        <i class="fa-solid fa-heart text-2xl md:text-3xl text-slate-900 animate-bounce"></i>
+                    </div>
+                </div>
+                <span class="mt-2 text-xs md:text-sm font-bold text-emerald-300 tracking-wider">Relationship 人際</span>
+                <span class="text-[10px] text-indigo-300">關卡 3</span>
+            </div>
+
+            <!-- Orb 4: Resilience -->
+            <div onclick="openOrbModal('resilience')" class="cursor-pointer group flex flex-col items-center">
+                <div id="orb-3" class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full border-2 border-dashed border-purple-400/40 bg-slate-900/50 flex items-center justify-center transition-all duration-500 relative overflow-hidden group-hover:scale-105">
+                    <div class="orb-inner absolute inset-0 rounded-full opacity-60"></div>
+                    <i id="orb-icon-3" class="fa-solid fa-shield-halved text-2xl text-purple-400/40 transition-all duration-300"></i>
+                    <!-- Glow Overlay -->
+                    <div id="orb-glow-3" class="absolute inset-0 rounded-full bg-courage opacity-0 transition-opacity duration-500 flex items-center justify-center shadow-courage-glow">
+                        <i class="fa-solid fa-crown text-2xl md:text-3xl text-amber-200"></i>
+                    </div>
+                </div>
+                <span class="mt-2 text-xs md:text-sm font-bold text-purple-300 tracking-wider">Resilience 抗逆</span>
+                <span class="text-[10px] text-indigo-300">關卡 4</span>
+            </div>
+        </div>
+
+        <!-- Main Passcode Input Console Panel -->
+        <div id="consolePanel" class="glass-panel w-full max-w-md rounded-3xl p-6 md:p-8 flex flex-col items-center border border-indigo-400/30 transition-all duration-300 relative">
+            
+            <!-- Passcode Display Slots -->
+            <div class="flex justify-center space-x-3 md:space-x-4 mb-6 w-full">
+                <div id="slot-0" class="w-14 h-16 sm:w-16 sm:h-20 rounded-2xl bg-slate-900/80 border-2 border-indigo-500/40 flex items-center justify-center text-3xl md:text-4xl font-extrabold text-yellow-300 shadow-inner transition-all duration-200"></div>
+                <div id="slot-1" class="w-14 h-16 sm:w-16 sm:h-20 rounded-2xl bg-slate-900/80 border-2 border-indigo-500/40 flex items-center justify-center text-3xl md:text-4xl font-extrabold text-blue-300 shadow-inner transition-all duration-200"></div>
+                <div id="slot-2" class="w-14 h-16 sm:w-16 sm:h-20 rounded-2xl bg-slate-900/80 border-2 border-indigo-500/40 flex items-center justify-center text-3xl md:text-4xl font-extrabold text-emerald-300 shadow-inner transition-all duration-200"></div>
+                <div id="slot-3" class="w-14 h-16 sm:w-16 sm:h-20 rounded-2xl bg-slate-900/80 border-2 border-indigo-500/40 flex items-center justify-center text-3xl md:text-4xl font-extrabold text-purple-300 shadow-inner transition-all duration-200"></div>
+            </div>
+
+            <!-- Error Message Alert Box -->
+            <div id="errorMessage" class="hidden mb-4 w-full bg-red-500/20 border border-red-500/50 rounded-xl p-2.5 text-center text-red-200 text-xs md:text-sm font-semibold animate-bounce">
+                <i class="fa-solid fa-triangle-exclamation mr-1"></i> 密碼不正確！請檢查各關卡的解密數字，再試一次！
+            </div>
+
+            <!-- Keypad Buttons 0-9 & Controls -->
+            <div class="grid grid-cols-3 gap-2.5 md:gap-3 w-full">
+                <button onclick="pressNum('1')" class="glass-btn text-2xl font-bold py-3.5 rounded-xl text-white active:scale-95">1</button>
+                <button onclick="pressNum('2')" class="glass-btn text-2xl font-bold py-3.5 rounded-xl text-white active:scale-95">2</button>
+                <button onclick="pressNum('3')" class="glass-btn text-2xl font-bold py-3.5 rounded-xl text-white active:scale-95">3</button>
+                <button onclick="pressNum('4')" class="glass-btn text-2xl font-bold py-3.5 rounded-xl text-white active:scale-95">4</button>
+                <button onclick="pressNum('5')" class="glass-btn text-2xl font-bold py-3.5 rounded-xl text-white active:scale-95">5</button>
+                <button onclick="pressNum('6')" class="glass-btn text-2xl font-bold py-3.5 rounded-xl text-white active:scale-95">6</button>
+                <button onclick="pressNum('7')" class="glass-btn text-2xl font-bold py-3.5 rounded-xl text-white active:scale-95">7</button>
+                <button onclick="pressNum('8')" class="glass-btn text-2xl font-bold py-3.5 rounded-xl text-white active:scale-95">8</button>
+                <button onclick="pressNum('9')" class="glass-btn text-2xl font-bold py-3.5 rounded-xl text-white active:scale-95">9</button>
+
+                <!-- Clear Button -->
+                <button onclick="clearPasscode()" class="btn-clear text-lg font-bold py-3.5 rounded-xl text-red-200 hover:text-white active:scale-95 flex items-center justify-center">
+                    <i class="fa-solid fa-delete-left"></i>
+                </button>
+                
+                <button onclick="pressNum('0')" class="glass-btn text-2xl font-bold py-3.5 rounded-xl text-white active:scale-95">0</button>
+
+                <!-- Submit Button -->
+                <button onclick="verifyPasscode()" class="btn-submit text-lg font-extrabold py-3.5 rounded-xl text-slate-900 active:scale-95 flex items-center justify-center">
+                    解密 <i class="fa-solid fa-key ml-1.5"></i>
+                </button>
+            </div>
+            
+            <p class="text-[11px] text-indigo-300/70 mt-4 text-center">
+                💡 支援實體鍵盤數字輸入 | 點擊上方記憶球可預覽能量卡
+            </p>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="relative z-10 py-3 text-center text-xs text-indigo-300/60">
+        深水埔街坊福利會小學 © 4Rs 精神健康推廣計畫
+    </footer>
+
+    <!-- SUCCESS CELEBRATION MODAL -->
+    <div id="successModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md hidden transition-opacity duration-300 opacity-0">
+        <div class="glass-panel max-w-lg w-full rounded-3xl p-6 md:p-8 text-center border-2 border-yellow-400/50 shadow-rainbow-glow transform scale-90 transition-transform duration-300 relative overflow-hidden" id="modalContainer">
+            
+            <!-- Confetti Floating Orbs Header -->
+            <div class="flex justify-center -space-x-3 mb-4">
+                <div class="w-12 h-12 rounded-full bg-joy shadow-joy-glow flex items-center justify-center text-slate-900 font-bold text-lg"><i class="fa-solid fa-sun"></i></div>
+                <div class="w-12 h-12 rounded-full bg-sadness shadow-sadness-glow flex items-center justify-center text-slate-900 font-bold text-lg"><i class="fa-solid fa-wind"></i></div>
+                <div class="w-12 h-12 rounded-full bg-disgust shadow-disgust-glow flex items-center justify-center text-slate-900 font-bold text-lg"><i class="fa-solid fa-heart"></i></div>
+                <div class="w-12 h-12 rounded-full bg-courage shadow-courage-glow flex items-center justify-center text-slate-900 font-bold text-lg"><i class="fa-solid fa-crown"></i></div>
+            </div>
+
+            <h2 class="text-2xl md:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-200 to-yellow-400 mb-3">
+                🎉 恭喜！記憶寶庫成功啟動！
+            </h2>
+
+            <p class="text-indigo-100 text-sm md:text-base leading-relaxed mb-6 font-medium">
+                你們展現了卓越的 <span class="text-yellow-300 font-bold">Rest 休息</span>、<span class="text-blue-300 font-bold">Relaxation 放鬆</span>、<span class="text-emerald-300 font-bold">Relationship 人際</span> 與 <span class="text-purple-300 font-bold">Resilience 抗逆</span> 能量！<br>
+                <span class="text-yellow-200 font-bold">「記憶定格，愛不消逝！」</span>
+            </p>
+
+            <!-- Reward Notice Box -->
+            <div class="bg-gradient-to-r from-amber-500/30 via-yellow-500/20 to-amber-500/30 border-2 border-yellow-400/60 rounded-2xl p-4 mb-6 shadow-lg">
+                <p class="text-xs text-yellow-200 uppercase tracking-widest font-bold mb-1">終極任務通關提示</p>
+                <p class="text-base md:text-lg font-black text-yellow-300 flex items-center justify-center">
+                    <i class="fa-solid fa-stamp text-2xl mr-2 animate-bounce"></i>
+                    請向現場導師領取『記憶寶庫通關印章』！
+                </p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                <button onclick="triggerConfetti()" class="glass-btn px-5 py-3 rounded-xl text-yellow-300 font-bold text-sm flex items-center justify-center hover:bg-yellow-500/20">
+                    <i class="fa-solid fa-sparkles mr-2"></i> 再看一次慶祝特效
+                </button>
+                <button onclick="resetConsole()" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold px-6 py-3 rounded-xl text-sm shadow-lg flex items-center justify-center">
+                    <i class="fa-solid fa-rotate-right mr-2"></i> 重置控制台
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4Rs KNOWLEDGE ORB PREVIEW MODAL -->
+    <div id="infoModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md hidden opacity-0 transition-opacity duration-300">
+        <div class="glass-panel max-w-md w-full rounded-3xl p-6 text-center border border-indigo-400/40 relative">
+            <button onclick="closeInfoModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-xl">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            
+            <div id="infoOrbIcon" class="w-16 h-16 rounded-full mx-auto mb-3 flex items-center justify-center text-3xl text-slate-900 font-bold shadow-lg"></div>
+            
+            <h3 id="infoTitle" class="text-2xl font-black mb-1"></h3>
+            <p id="infoSubtitle" class="text-xs font-semibold text-indigo-300 mb-4"></p>
+            
+            <p id="infoDescription" class="text-sm text-indigo-100 leading-relaxed mb-6 text-left bg-slate-900/60 p-4 rounded-xl border border-white/10"></p>
+            
+            <button onclick="closeInfoModal()" class="w-full glass-btn py-2.5 rounded-xl text-sm font-bold text-white">
+                了解，返回控制台
+            </button>
+        </div>
+    </div>
+
+    <!-- JavaScript Game Logic -->
+    <script>
+        // Target passcode
+        const CORRECT_PASSCODE = "2172";
+        let currentPasscode = "";
+        let soundEnabled = true;
+
+        // Audio Context initialization for synthesized sound effects
+        let audioCtx = null;
+
+        function getAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        // Toggle Sound State
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const soundIcon = document.getElementById('soundIcon');
+            const soundText = document.getElementById('soundText');
+            if (soundEnabled) {
+                soundIcon.className = "fa-solid fa-volume-high text-lg";
+                soundText.innerText = "音效：開啟";
+                playBeep(880, 'sine', 0.1);
+            } else {
+                soundIcon.className = "fa-solid fa-volume-xmark text-lg text-gray-400";
+                soundText.innerText = "音效：靜音";
+            }
+        }
+
+        // Synthesize Sound Effects using Web Audio API
+        function playBeep(freq, type = 'sine', duration = 0.1) {
+            if (!soundEnabled) return;
+            try {
+                const ctx = getAudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, ctx.currentTime);
+                
+                gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+                
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                
+                osc.start();
+                osc.stop(ctx.currentTime + duration);
+            } catch (e) {
+                console.log("Audio play error:", e);
+            }
+        }
+
+        // Crystal Fanfare Sound for Win
+        function playWinFanfare() {
+            if (!soundEnabled) return;
+            const ctx = getAudioContext();
+            const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98]; // C5, E5, G5, C6, E6, G6
+            notes.forEach((freq, index) => {
+                setTimeout(() => {
+                    playBeep(freq, 'triangle', 0.4);
+                }, index * 100);
+            });
+        }
+
+        // Error Warning Sound
+        function playErrorSound() {
+            if (!soundEnabled) return;
+            const ctx = getAudioContext();
+            playBeep(220, 'sawtooth', 0.2);
+            setTimeout(() => playBeep(180, 'sawtooth', 0.3), 150);
+        }
+
+        // Keypad Press Handler
+        function pressNum(num) {
+            if (currentPasscode.length < 4) {
+                currentPasscode += num;
+                playBeep(520 + (currentPasscode.length * 100), 'sine', 0.08);
+                updateDisplay();
+                hideError();
+            }
+        }
+
+        // Clear Passcode
+        function clearPasscode() {
+            if (currentPasscode.length > 0) {
+                playBeep(350, 'sine', 0.08);
+                currentPasscode = "";
+                updateDisplay();
+                hideError();
+            }
+        }
+
+        // Keydown Physical Keyboard Listener
+        document.addEventListener('keydown', (e) => {
+            if (e.key >= '0' && e.key <= '9') {
+                pressNum(e.key);
+            } else if (e.key === 'Backspace') {
+                if (currentPasscode.length > 0) {
+                    currentPasscode = currentPasscode.slice(0, -1);
+                    playBeep(350, 'sine', 0.08);
+                    updateDisplay();
+                    hideError();
+                }
+            } else if (e.key === 'Enter') {
+                verifyPasscode();
+            }
+        });
+
+        // Update UI Display Slots and Light Up Orbs
+        function updateDisplay() {
+            for (let i = 0; i < 4; i++) {
+                const slot = document.getElementById(`slot-${i}`);
+                const orbGlow = document.getElementById(`orb-glow-${i}`);
+                const orbIcon = document.getElementById(`orb-icon-${i}`);
+
+                if (i < currentPasscode.length) {
+                    slot.innerText = "●"; // Hidden bullet or char
+                    slot.classList.add('border-yellow-300', 'bg-indigo-900/90');
+                    
+                    // Illuminate corresponding orb
+                    orbGlow.classList.remove('opacity-0');
+                    orbGlow.classList.add('opacity-100');
+                    orbIcon.classList.add('opacity-0');
+                } else {
+                    slot.innerText = "";
+                    slot.classList.remove('border-yellow-300', 'bg-indigo-900/90');
+                    
+                    // Dim orb
+                    orbGlow.classList.remove('opacity-100');
+                    orbGlow.classList.add('opacity-0');
+                    orbIcon.classList.remove('opacity-0');
+                }
+            }
+        }
+
+        function hideError() {
+            const errBox = document.getElementById('errorMessage');
+            const consolePanel = document.getElementById('consolePanel');
+            errBox.classList.add('hidden');
+            consolePanel.classList.remove('animate-shake');
+        }
+
+        // Verify Passcode Logic
+        function verifyPasscode() {
+            if (currentPasscode.length < 4) {
+                playErrorSound();
+                showError("請完整輸入 4 位密碼！");
+                return;
+            }
+
+            if (currentPasscode === CORRECT_PASSCODE) {
+                // SUCCESS
+                playWinFanfare();
+                triggerConfetti();
+                showSuccessModal();
+            } else {
+                // FAIL
+                playErrorSound();
+                showError("密碼不正確！請檢查各關卡的解密數字，再試一次！");
+            }
+        }
+
+        function showError(msg) {
+            const errBox = document.getElementById('errorMessage');
+            const consolePanel = document.getElementById('consolePanel');
+            errBox.innerText = msg;
+            errBox.classList.remove('hidden');
+            
+            consolePanel.classList.remove('animate-shake');
+            void consolePanel.offsetWidth; // Trigger reflow for animation restart
+            consolePanel.classList.add('animate-shake');
+        }
+
+        // Show Success Modal
+        function showSuccessModal() {
+            const modal = document.getElementById('successModal');
+            const container = document.getElementById('modalContainer');
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                container.classList.remove('scale-90');
+                container.classList.add('scale-100');
+            }, 50);
+        }
+
+        // Confetti Particle Explosion
+        function triggerConfetti() {
+            const count = 200;
+            const defaults = {
+                origin: { y: 0.7 }
+            };
+
+            function fire(particleRatio, opts) {
+                confetti(Object.assign({}, defaults, opts, {
+                    particleCount: Math.floor(count * particleRatio)
+                }));
+            }
+
+            fire(0.25, {
+                spread: 26,
+                startVelocity: 55,
+                colors: ['#FFE853', '#4DA8FF']
+            });
+            fire(0.2, {
+                spread: 60,
+                colors: ['#5BE38A', '#B163FF']
+            });
+            fire(0.35, {
+                spread: 100,
+                decay: 0.91,
+                scalar: 0.8
+            });
+            fire(0.1, {
+                spread: 120,
+                startVelocity: 25,
+                decay: 0.92,
+                colors: ['#FFE853', '#FFFFFF', '#FFD700']
+            });
+            fire(0.1, {
+                spread: 120,
+                startVelocity: 45,
+            });
+        }
+
+        // Reset Console
+        function resetConsole() {
+            currentPasscode = "";
+            updateDisplay();
+            hideError();
+            
+            const modal = document.getElementById('successModal');
+            const container = document.getElementById('modalContainer');
+            
+            container.classList.remove('scale-100');
+            container.classList.add('scale-90');
+            modal.classList.add('opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        // 4Rs Info Modals Data
+        const orbInfoData = {
+            rest: {
+                title: "Rest 休息",
+                subtitle: "樂樂 Joy - 煥發活力能量",
+                iconClass: "fa-sun bg-joy text-slate-900",
+                color: "text-yellow-300",
+                desc: "充足的睡眠與定期的休息是大腦重組記憶、恢復體力的黃金時間！每天保持規律作息，才能讓情緒大腦隨時保持活力充滿樂趣！"
+            },
+            relaxation: {
+                title: "Relaxation 放鬆",
+                subtitle: "憂憂 Sadness - 溫和舒緩心靈",
+                iconClass: "fa-wind bg-sadness text-slate-900",
+                color: "text-blue-300",
+                desc: "當感到壓力或焦慮時，透過深呼吸、聽音樂或進行適度的伸展，給自己一個放鬆的空間，讓心境如平靜湖水般恢復沉靜與清晰。"
+            },
+            relationship: {
+                title: "Relationship 人際",
+                subtitle: "厭厭/正向 - 建立溫暖連結",
+                iconClass: "fa-heart bg-disgust text-slate-900",
+                color: "text-emerald-300",
+                desc: "與家人、朋友及老師保持良好的溝通與互動，彼此傾聽與支持。擁有正向健康的人際關係，是我們成長道路上最強大的後盾！"
+            },
+            resilience: {
+                title: "Resilience 抗逆",
+                subtitle: "Courage - 紫金勇氣能量",
+                iconClass: "fa-crown bg-courage text-amber-200",
+                color: "text-purple-300",
+                desc: "面對困難與挫折時，保持積極樂觀的心態，從錯誤中學習並重新站起來。培養堅韌不拔的抗逆力，能讓你 become stronger！"
+            }
+        };
+
+        function openOrbModal(key) {
+            playBeep(600, 'sine', 0.1);
+            const data = orbInfoData[key];
+            const infoOrbIcon = document.getElementById('infoOrbIcon');
+            const infoTitle = document.getElementById('infoTitle');
+            const infoSubtitle = document.getElementById('infoSubtitle');
+            const infoDescription = document.getElementById('infoDescription');
+            
+            infoOrbIcon.className = `w-16 h-16 rounded-full mx-auto mb-3 flex items-center justify-center text-3xl shadow-lg ${data.iconClass}`;
+            infoOrbIcon.innerHTML = `<i class="fa-solid ${data.iconClass.split(' ')[0]}"></i>`;
+            
+            infoTitle.innerText = data.title;
+            infoTitle.className = `text-2xl font-black mb-1 ${data.color}`;
+            infoSubtitle.innerText = data.subtitle;
+            infoDescription.innerText = data.desc;
+
+            const modal = document.getElementById('infoModal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 50);
+        }
+
+        function closeInfoModal() {
+            playBeep(400, 'sine', 0.08);
+            const modal = document.getElementById('infoModal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        // Canvas Starfield Background
+        const canvas = document.getElementById('starCanvas');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            initStars();
+        }
+
+        function initStars() {
+            stars = [];
+            const count = Math.floor((canvas.width * canvas.height) / 4000);
+            for (let i = 0; i < count; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    radius: Math.random() * 1.8,
+                    alpha: Math.random(),
+                    speed: 0.005 + Math.random() * 0.015
+                });
+            }
+        }
+
+        function animateStars() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            stars.forEach(star => {
+                star.alpha += star.speed;
+                if (star.alpha > 1 || star.alpha < 0) {
+                    star.speed = -star.speed;
+                }
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${Math.abs(star.alpha)})`;
+                ctx.fill();
+            });
+            requestAnimationFrame(animateStars);
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        window.onload = function() {
+            resizeCanvas();
+            animateStars();
+        };
+    </script>
+</body>
+</html>
