@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>繽紛兒童圖書館 - 快樂閱讀與探索</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            yellow: '#FFD166',
+                            pink: '#FF85A1',
+                            blue: '#4CC9F0',
+                            purple: '#7209B7',
+                            green: '#06D6A0',
+                            dark: '#2B2D42'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Noto Sans TC', 'Fredoka', 'sans-serif'],
+                        fun: ['Fredoka', 'Noto Sans TC', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #F7F0F5;
+            background-image: radial-gradient(#4CC9F0 1.5px, transparent 1.5px), radial-gradient(#FF85A1 1.5px, #F7F0F5 1.5px);
+            background-size: 60px 60px;
+            background-position: 0 0, 30px 30px;
+            font-family: 'Noto Sans TC', sans-serif;
+            user-select: none;
+        }
+
+        .cartoon-border {
+            border: 4px solid #2B2D42;
+            box-shadow: 6px 6px 0px #2B2D42;
+            transition: all 0.2s ease;
+        }
+
+        .cartoon-border:hover {
+            transform: translateY(-3px);
+            box-shadow: 8px 8px 0px #2B2D42;
+        }
+
+        .cartoon-btn {
+            border: 3px solid #2B2D42;
+            box-shadow: 4px 4px 0px #2B2D42;
+            transition: all 0.15s ease;
+        }
+
+        .cartoon-btn:active {
+            transform: translate(3px, 3px);
+            box-shadow: 1px 1px 0px #2B2D42;
+        }
+
+        .country-card {
+            border: 3px solid #2B2D42;
+            box-shadow: 4px 4px 0px #2B2D42;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .country-card:hover {
+            transform: translateY(-2px) scale(1.01);
+            box-shadow: 6px 6px 0px #2B2D42;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(2deg); }
+        }
+
+        .floating-element {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(76, 201, 240, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(76, 201, 240, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(76, 201, 240, 0); }
+        }
+
+        .speech-active {
+            animation: pulse-ring 1.5s infinite;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #FFE3EA;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #FF85A1;
+            border-radius: 10px;
+            border: 3px solid #FFE3EA;
+        }
+    </style>
+</head>
+<body class="text-slate-800 min-h-screen flex flex-col justify-between">
+
+    <!-- Top Navigation Header -->
+    <header class="sticky top-0 z-50 bg-white border-b-4 border-slate-800 px-4 py-3 shadow-md">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            <!-- Logo & Mascot -->
+            <div class="flex items-center gap-3">
+                <div class="w-14 h-14 bg-brand-yellow rounded-full cartoon-border flex items-center justify-center text-3xl flex-shrink-0">
+                    🦉
+                </div>
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-black text-slate-800 tracking-wide font-fun flex items-center gap-2">
+                        繽紛童趣圖書館 <span class="text-xs bg-brand-pink text-white px-2 py-1 rounded-full border-2 border-slate-800">小學生專屬</span>
+                    </h1>
+                    <p class="text-xs font-bold text-slate-500">歡迎來到知識的大森林！探索世界與身體的奧秘</p>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="flex flex-wrap gap-2 justify-center">
+                <a href="#hero" class="cartoon-btn bg-brand-yellow px-4 py-2 rounded-2xl font-black text-sm text-slate-800 hover:bg-yellow-300 flex items-center gap-1">
+                    🏠 圖書館大門
+                </a>
+                <a href="#world-book" class="cartoon-btn bg-brand-blue px-4 py-2 rounded-2xl font-black text-sm text-slate-800 hover:bg-cyan-300 flex items-center gap-1">
+                    🌍 100處迷人地方
+                </a>
+                <a href="#body-book" class="cartoon-btn bg-brand-pink px-4 py-2 rounded-2xl font-black text-sm text-slate-800 hover:bg-pink-300 flex items-center gap-1">
+                    🧠 身體大奧祕
+                </a>
+                <a href="#game-section" class="cartoon-btn bg-brand-green px-4 py-2 rounded-2xl font-black text-sm text-slate-800 hover:bg-emerald-300 flex items-center gap-1">
+                    🎮 圖書大捕手
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-6 flex-grow space-y-12">
+
+        <!-- Hero Banner Section -->
+        <section id="hero" class="relative bg-gradient-to-r from-amber-100 via-orange-100 to-rose-100 rounded-3xl p-6 md:p-10 cartoon-border overflow-hidden">
+            <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="max-w-2xl space-y-4 text-center md:text-left">
+                    <span class="inline-block bg-brand-purple text-white font-bold text-xs px-3 py-1.5 rounded-full border-2 border-slate-800">
+                        ✨ 快樂閱讀 • 聽説好故事
+                    </span>
+                    <h2 class="text-3xl md:text-5xl font-black text-slate-800 leading-tight">
+                        打開書本，<br/><span class="text-brand-purple">抱抱大世界</span> 與 <span class="text-brand-pink">神奇身體</span>！
+                    </h2>
+                    <p class="text-base md:text-lg font-bold text-slate-700">
+                        這裡有會講故事的廣東話導覽，還有好玩的抓圖書小遊戲，快點選一本書開始你的神奇之旅吧！
+                    </p>
+                    <div class="flex flex-wrap gap-4 justify-center md:justify-start pt-2">
+                        <button onclick="stopSpeech(); playSound('click'); document.getElementById('world-book').scrollIntoView({behavior: 'smooth'})" 
+                                class="cartoon-btn bg-brand-blue font-black px-6 py-3 rounded-2xl text-slate-800 hover:bg-cyan-300 flex items-center gap-2">
+                            <span>🚀 立即瀏覽推薦好書</span>
+                        </button>
+                        <button onclick="stopSpeech(); playSound('click'); document.getElementById('game-section').scrollIntoView({behavior: 'smooth'})" 
+                                class="cartoon-btn bg-brand-green font-black px-6 py-3 rounded-2xl text-slate-800 hover:bg-emerald-300 flex items-center gap-2">
+                            <span>🎮 玩 catch 遊戲</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Floating Mascot -->
+                <div class="relative w-64 h-64 flex-shrink-0 flex items-center justify-center">
+                    <div class="absolute inset-0 bg-brand-yellow rounded-full border-4 border-slate-800 floating-element"></div>
+                    <div class="relative z-10 text-center space-y-2">
+                        <div class="text-7xl">📚🐱</div>
+                        <div class="bg-white px-3 py-1 rounded-full border-2 border-slate-800 text-xs font-black">
+                            圖書館小館長「喵咪」
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Book 1: 100個國家的100處迷人地方 -->
+        <section id="world-book" class="space-y-6">
+            <!-- Header Banner -->
+            <div class="bg-cyan-50 rounded-3xl p-4 md:p-6 cartoon-border flex items-center justify-between flex-wrap gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-brand-pink text-white rounded-2xl border-3 border-slate-800 flex items-center justify-center text-2xl flex-shrink-0">
+                        🌐
+                    </div>
+                    <div>
+                        <h2 class="text-xl md:text-3xl font-black text-slate-800">100個國家的100處迷人地方</h2>
+                        <p class="text-xs md:text-sm font-bold text-slate-500">帶你環遊世界，認識不同國家的有趣文化與奇觀！</p>
+                    </div>
+                </div>
+                <span class="bg-pink-100 text-brand-pink border-2 border-slate-800 font-black text-xs px-3 py-1.5 rounded-full">
+                    環球地理小達人
+                </span>
+            </div>
+
+            <!-- Main Interactive Container (Image Layout) -->
+            <div class="bg-white rounded-3xl p-4 md:p-8 cartoon-border">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                    
+                    <!-- Left Column: Featured Book Card Frame -->
+                    <div class="lg:col-span-5 bg-amber-50 border-4 border-slate-800 rounded-3xl p-5 shadow-sm space-y-4">
+                        <div class="bg-white border-4 border-slate-800 rounded-2xl p-4 flex flex-col items-center text-center shadow-inner">
+                            <div class="w-full max-w-[240px] aspect-[3/4] bg-slate-100 rounded-xl border-3 border-slate-800 overflow-hidden mb-4 shadow-sm">
+                                <img src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80" 
+                                     alt="100個國家的100處迷人地方" 
+                                     class="w-full h-full object-cover"
+                                     onerror="this.onerror=null; this.src='https://placehold.co/400x500/FFD166/2B2D42?text=100處迷人地方';">
+                            </div>
+                            <h3 class="text-lg md:text-xl font-black text-slate-800 mb-1">《100個國家的100處迷人地方》</h3>
+                            <p class="text-xs font-bold text-slate-500">編著：辛吉青、楊曉鳳 | 圖：趙俊徑等</p>
+                        </div>
+
+                        <!-- Feature Pills -->
+                        <div class="bg-white border-3 border-slate-800 rounded-2xl p-4 space-y-2.5">
+                            <div class="flex items-center gap-2 text-xs font-black text-amber-600">
+                                <span class="w-5 h-5 rounded-full bg-amber-400 border border-slate-800 flex items-center justify-center text-white text-[10px]">✓</span>
+                                認識與尊重不同族群文化
+                            </div>
+                            <div class="flex items-center gap-2 text-xs font-black text-purple-600">
+                                <span class="w-5 h-5 rounded-full bg-purple-400 border border-slate-800 flex items-center justify-center text-white text-[10px]">✓</span>
+                                增廣見聞、拓展視野
+                            </div>
+                            <div class="flex items-center gap-2 text-xs font-black text-emerald-600">
+                                <span class="w-5 h-5 rounded-full bg-emerald-400 border border-slate-800 flex items-center justify-center text-white text-[10px]">✓</span>
+                                培養互信互助的世界觀
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Country Grid Header & 6 Country Cards -->
+                    <div class="lg:col-span-7 space-y-4">
+                        <div class="flex items-center justify-between border-b-2 border-slate-200 pb-3">
+                            <div class="flex items-center gap-2 font-black text-slate-800 text-sm md:text-base">
+                                <span class="text-brand-pink text-lg">🧭</span> 點擊卡片探索精選國家景點與真實照片：
+                            </div>
+                            <span class="text-xs font-bold text-slate-400">共 6 個精選國家</span>
+                        </div>
+
+                        <!-- Grid of 6 requested countries (2 columns) -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                            <!-- 1. 奧地利 (AT) -->
+                            <div onclick="openCountryModal('austria')" class="country-card bg-amber-50 rounded-2xl p-3.5 flex items-center justify-between group">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 bg-white rounded-xl border-2 border-slate-800 flex items-center justify-center text-2xl flex-shrink-0">
+                                        🎻
+                                    </div>
+                                    <div class="space-y-1">
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="font-black text-base text-slate-800">奧地利</span>
+                                            <span class="text-[10px] font-black uppercase text-slate-500">AT</span>
+                                            <span class="bg-amber-200 border border-slate-800 text-[10px] font-black px-1.5 py-0.5 rounded-full">工藝音樂</span>
+                                        </div>
+                                        <p class="text-xs font-bold text-slate-600">「最熱愛木製品與音樂」 🎼</p>
+                                    </div>
+                                </div>
+                                <div class="text-slate-400 group-hover:text-slate-800 font-black text-lg transition-transform group-hover:translate-x-1">❯</div>
+                            </div>
+
+                            <!-- 2. 比利時 (BE) -->
+                            <div onclick="openCountryModal('belgium')" class="country-card bg-pink-50 rounded-2xl p-3.5 flex items-center justify-between group">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 bg-white rounded-xl border-2 border-slate-800 flex items-center justify-center text-2xl flex-shrink-0">
+                                        🍫
+                                    </div>
+                                    <div class="space-y-1">
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="font-black text-base text-slate-800">比利時</span>
+                                            <span class="text-[10px] font-black uppercase text-slate-500">BE</span>
+                                            <span class="bg-pink-200 border border-slate-800 text-[10px] font-black px-1.5 py-0.5 rounded-full">布魯塞爾</span>
+                                        </div>
+                                        <p class="text-xs font-bold text-slate-600">「歐洲最重要的心臟首都」 <span class="text-[9px] font-extrabold text-indigo-500">EU</span></p>
+                                    </div>
+                                </div>
+                                <div class="text-slate-400 group-hover:text-slate-800 font-black text-lg transition-transform group-hover:translate-x-1">❯</div>
+                            </div>
+
+                            <!-- 3. 英國 (GB) -->
+                            <div onclick="openCountryModal('uk')" class="country-card bg-purple-50 rounded-2xl p-3.5 flex items-center justify-between group">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 bg-white rounded-xl border-2 border-slate-800 flex items-center justify-center text-2xl flex-shrink-0">
+                                        👑
+                                    </div>
+                                    <div class="space-y-1">
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="font-black text-base text-slate-800">英國</span>
+                                            <span class="text-[10px] font-black uppercase text-slate-500">GB</span>
+                                            <span class="bg-purple-200 border border-slate-800 text-[10px] font-black px-1.5 py-0.5 rounded-full">公園長椅</span>
+                                        </div>
+                                        <p class="text-xs font-bold text-slate-600">「會講故事的公園長椅」 🪵</p>
+                                    </div>
+                                </div>
+                                <div class="text-slate-400 group-hover:text-slate-800 font-black text-lg transition-transform group-hover:translate-x-1">❯</div>
+                            </div>
+
+                            <!-- 4. 捷克 (CZ) -->
+                            <div onclick="openCountryModal('czech')" class="country-card bg-yellow-50 rounded-2xl p-3.5 flex items-center justify-between group">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 bg-white rounded-xl border-2 border-slate-800 flex items-center justify-center text-2xl flex-shrink-0">
+                                        🏰
+                                    </div>
+                                    <div class="space-y-1">
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="font-black text-base text-slate-800">捷克</span>
+                                            <span class="text-[10px] font-black uppercase text-slate-500">CZ</span>
+                                            <span class="bg-yellow-200 border border-slate-800 text-[10px] font-black px-1.5 py-0.5 rounded-full">布拉格</span>
+                                        </div>
+                                        <p class="text-xs font-bold text-slate-600">「璀璨童話般的金色城市」 ✨</p>
+                                    </div>
+                                </div>
+                                <div class="text-slate-400 group-hover:text-slate-800 font-black text-lg transition-transform group-hover:translate-x-1">❯</div>
+                            </div>
+
+                            <!-- 5. 丹麥 (DK) -->
+                            <div onclick="openCountryModal('denmark')" class="country-card bg-rose-50 rounded-2xl p-3.5 flex items-center justify-between group">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 bg-white rounded-xl border-2 border-slate-800 flex items-center justify-center text-2xl flex-shrink-0">
+                                        🧜‍♀️
+                                    </div>
+                                    <div class="space-y-1">
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="font-black text-base text-slate-800">丹麥</span>
+                                            <span class="text-[10px] font-black uppercase text-slate-500">DK</span>
+                                            <span class="bg-rose-200 border border-slate-800 text-[10px] font-black px-1.5 py-0.5 rounded-full">哥本哈根</span>
+                                        </div>
+                                        <p class="text-xs font-bold text-slate-600">「童話大師安徒生的家鄉」 📖</p>
+                                    </div>
+                                </div>
+                                <div class="text-slate-400 group-hover:text-slate-800 font-black text-lg transition-transform group-hover:translate-x-1">❯</div>
+                            </div>
+
+                            <!-- 6. 法國 (FR) -->
+                            <div onclick="openCountryModal('france')" class="country-card bg-emerald-50 rounded-2xl p-3.5 flex items-center justify-between group">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 bg-white rounded-xl border-2 border-slate-800 flex items-center justify-center text-2xl flex-shrink-0">
+                                        🌸
+                                    </div>
+                                    <div class="space-y-1">
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="font-black text-base text-slate-800">法國</span>
+                                            <span class="text-[10px] font-black uppercase text-slate-500">FR</span>
+                                            <span class="bg-emerald-200 border border-slate-800 text-[10px] font-black px-1.5 py-0.5 rounded-full">格拉斯</span>
+                                        </div>
+                                        <p class="text-xs font-bold text-slate-600">「飄香百年的世界香水之都」 🥖</p>
+                                    </div>
+                                </div>
+                                <div class="text-slate-400 group-hover:text-slate-800 font-black text-lg transition-transform group-hover:translate-x-1">❯</div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Book 2: 10萬小知識：身體大奧祕 -->
+        <section id="body-book" class="space-y-6 pt-6">
+            <div class="bg-brand-pink text-slate-800 rounded-3xl p-6 cartoon-border flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="w-16 h-16 bg-white rounded-2xl border-4 border-slate-800 flex items-center justify-center text-3xl flex-shrink-0">
+                        🧪
+                    </div>
+                    <div>
+                        <span class="bg-white text-slate-800 text-xs font-black px-2.5 py-1 rounded-full border-2 border-slate-800">人體科學百科</span>
+                        <h2 class="text-2xl md:text-3xl font-black">精選好書 2：《10萬小知識：身體大奧祕》</h2>
+                        <p class="text-sm font-bold opacity-90">探索奇妙的器官與現象，養成健康的習慣！</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                <!-- Category 1: 生理現象 -->
+                <div class="bg-amber-50 rounded-3xl p-6 cartoon-border flex flex-col justify-between space-y-4">
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2">
+                            <span class="text-2xl">💨</span>
+                            <h3 class="text-xl font-black text-slate-800">1. 神奇生理現象</h3>
+                        </div>
+                        
+                        <div class="bg-white p-4 rounded-2xl border-2 border-slate-800 space-y-2">
+                            <p class="text-sm font-black text-amber-600">❓ 冬天嘴巴為什麼會「哈出白煙」？</p>
+                            <p class="text-xs font-bold text-slate-600 leading-relaxed">
+                                因為我們吐出的熱呼呼水蒸氣遇到外面的冷空氣，會迅速凝結成小水滴，變成像白煙一樣！
+                            </p>
+                            <button onclick="speakText('冬天為什麼嘴巴可以哈出白煙？因為吐出的熱水蒸氣遇到冷空氣會凝結成小水滴！', this)" 
+                                    class="cartoon-btn w-full bg-amber-200 text-xs py-1.5 rounded-lg font-bold">
+                                🔊 廣東話說明
+                            </button>
+                        </div>
+
+                        <div class="bg-white p-4 rounded-2xl border-2 border-slate-800 space-y-2">
+                            <p class="text-sm font-black text-amber-600">❓ 感到疲勞時為什麼想睡覺？</p>
+                            <p class="text-xs font-bold text-slate-600 leading-relaxed">
+                                大腦經過一天的工作累積了疲勞物質，它發出警告信號提示你需要休息充電啦！
+                            </p>
+                            <button onclick="speakText('感到疲勞時為什麼會想睡覺？因為大腦累積了疲勞訊號，需要睡覺充電！', this)" 
+                                    class="cartoon-btn w-full bg-amber-200 text-xs py-1.5 rounded-lg font-bold">
+                                🔊 廣東話說明
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category 2: 器官運作 -->
+                <div class="bg-cyan-50 rounded-3xl p-6 cartoon-border flex flex-col justify-between space-y-4">
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2">
+                            <span class="text-2xl">🫀</span>
+                            <h3 class="text-xl font-black text-slate-800">2. 器官忙碌運作</h3>
+                        </div>
+
+                        <div class="bg-white p-4 rounded-2xl border-2 border-slate-800 space-y-2">
+                            <p class="text-sm font-black text-cyan-600">❤️ 心臟如何不停歇跳動？</p>
+                            <p class="text-xs font-bold text-slate-600 leading-relaxed">
+                                心臟由最強壯的肌肉組成，像一個超強幫浦，一生中晝夜不息地跳動推送血液！
+                            </p>
+                            <button onclick="speakText('心臟如何不停歇地跳動？心臟由強壯的肌肉組成，像超強水泵一樣不斷送血！', this)" 
+                                    class="cartoon-btn w-full bg-cyan-200 text-xs py-1.5 rounded-lg font-bold">
+                                🔊 廣東話說明
+                            </button>
+                        </div>
+
+                        <div class="bg-white p-4 rounded-2xl border-2 border-slate-800 space-y-2">
+                            <p class="text-sm font-black text-cyan-600">🩸 血液如何運送營養？</p>
+                            <p class="text-xs font-bold text-slate-600 leading-relaxed">
+                                血管就像身體裡的密密麻麻高速公路，紅血球把氧氣與養分送達全身各個器官。
+                            </p>
+                            <button onclick="speakText('血液如何跑遍全身運送營養？血管是高速公路，紅血球把氧氣與養分送到全身！', this)" 
+                                    class="cartoon-btn w-full bg-cyan-200 text-xs py-1.5 rounded-lg font-bold">
+                                🔊 廣東話說明
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category 3: 健康生活 -->
+                <div class="bg-emerald-50 rounded-3xl p-6 cartoon-border flex flex-col justify-between space-y-4">
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2">
+                            <span class="text-2xl">🥦</span>
+                            <h3 class="text-xl font-black text-slate-800">3. 健康生活小達人</h3>
+                        </div>
+
+                        <div class="bg-white p-4 rounded-2xl border-2 border-slate-800 space-y-2">
+                            <p class="text-sm font-black text-emerald-600">🥗 多吃五彩蔬菜水果</p>
+                            <p class="text-xs font-bold text-slate-600 leading-relaxed">
+                                不同顏色的蔬果有不同的維生素與膳食纖維，打造堅固免疫力防線！
+                            </p>
+                            <button onclick="speakText('健康生活：多吃五彩蔬果，補充豐富維生素，增強免疫力！', this)" 
+                                    class="cartoon-btn w-full bg-emerald-200 text-xs py-1.5 rounded-lg font-bold">
+                                🔊 廣東話說明
+                            </button>
+                        </div>
+
+                        <div class="bg-white p-4 rounded-2xl border-2 border-slate-800 space-y-2">
+                            <p class="text-sm font-black text-emerald-600">💧 早睡早起多喝水</p>
+                            <p class="text-xs font-bold text-slate-600 leading-relaxed">
+                                水分能幫助器官排毒代謝，充足睡眠能讓生長激素大量分泌，讓你長得更高！
+                            </p>
+                            <button onclick="speakText('早睡早起多喝水，能促進身體代謝，幫你長高長壯！', this)" 
+                                    class="cartoon-btn w-full bg-emerald-200 text-xs py-1.5 rounded-lg font-bold">
+                                🔊 廣東話說明
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Game Section: 圖書館大捕手 (Catch the Books!) -->
+        <section id="game-section" class="pt-6 space-y-4">
+            <div class="bg-brand-yellow rounded-3xl p-6 cartoon-border text-center space-y-2">
+                <span class="bg-white text-slate-800 font-black text-xs px-3 py-1 rounded-full border-2 border-slate-800">
+                    🎯 圖書館守則互動遊戲
+                </span>
+                <h2 class="text-3xl font-black text-slate-800">🎮 圖書館大捕手 (Catch the Books!)</h2>
+                <p class="text-sm font-bold text-slate-700">
+                    使用左右箭頭鍵、A/D 鍵或滑鼠/手指滑動控制書籃！<br/>
+                    <span class="text-emerald-700">✅ 捕捉神奇圖書 (+10分)</span> | 
+                    <span class="text-rose-600">❌ 避開違反規則行為 (🤫說話、🍔食物、🥤飲料) (-10分)</span>
+                </p>
+            </div>
+
+            <!-- Game Container -->
+            <div class="relative bg-slate-900 rounded-3xl cartoon-border overflow-hidden p-4 flex flex-col items-center">
+                
+                <!-- Top Status Bar -->
+                <div class="w-full max-w-2xl flex flex-wrap justify-between items-center bg-slate-800 text-white p-3 rounded-2xl border-2 border-slate-700 mb-4 text-xs md:text-sm font-black">
+                    <div class="flex items-center gap-2">
+                        <span>🏆 得分:</span>
+                        <span id="game-score" class="text-brand-yellow text-xl">0</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span>🔥 連擊:</span>
+                        <span id="game-streak" class="text-brand-green text-xl">0</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span>⏱️ 時間:</span>
+                        <span id="game-timer" class="text-brand-pink text-xl">60s</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span>🌟 最高分:</span>
+                        <span id="game-highscore" class="text-brand-blue text-xl">0</span>
+                    </div>
+                </div>
+
+                <!-- Canvas Game Screen -->
+                <div class="relative w-full max-w-2xl aspect-[4/3] bg-gradient-to-b from-sky-200 via-amber-50 to-orange-100 rounded-2xl border-4 border-slate-800 overflow-hidden shadow-inner">
+                    <canvas id="gameCanvas" class="w-full h-full block"></canvas>
+
+                    <!-- Game Overlay Modal -->
+                    <div id="gameOverlay" class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center text-white space-y-4">
+                        <div id="overlayEmoji" class="text-6xl animate-bounce">🧺</div>
+                        <h3 id="overlayTitle" class="text-3xl font-black">圖書館大捕手！</h3>
+                        <p id="overlayDesc" class="text-sm max-w-md font-bold text-slate-200">
+                            快來幫圖書館員用籃子收集接住掉落的書籍！注意遵守圖書館守則，不要接住食物或噪音哦！
+                        </p>
+                        <button id="startBtn" onclick="startGame()" 
+                                class="cartoon-btn bg-brand-green text-slate-900 font-black px-8 py-3 rounded-2xl text-lg hover:bg-emerald-300">
+                            🚀 開始遊戲！
+                        </button>
+                    </div>
+
+                    <!-- Rule Violation Alert Banner -->
+                    <div id="warningBanner" class="hidden absolute top-4 left-1/2 -translate-x-1/2 bg-rose-500 text-white font-black text-sm px-4 py-2 rounded-xl border-2 border-slate-800 animate-pulse flex items-center gap-2 shadow-lg">
+                        ⚠️ 扣分！違反圖書館規則 (-10)
+                    </div>
+                </div>
+
+                <!-- Touch / Mobile Controls -->
+                <div class="w-full max-w-2xl flex justify-between items-center mt-4 gap-4 md:hidden">
+                    <button class="cartoon-btn flex-1 bg-brand-blue font-black py-3 rounded-2xl text-slate-800 text-lg active:bg-cyan-400" 
+                            ontouchstart="moveLeft(true)" ontouchend="moveLeft(false)" onmousedown="moveLeft(true)" onmouseup="moveLeft(false)">
+                        ⬅️ 左移
+                    </button>
+                    <button class="cartoon-btn flex-1 bg-brand-blue font-black py-3 rounded-2xl text-slate-800 text-lg active:bg-cyan-400" 
+                            ontouchstart="moveRight(true)" ontouchend="moveRight(false)" onmousedown="moveRight(true)" onmouseup="moveRight(false)">
+                        右移 ➡️
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Rich Country Modal Popup -->
+    <div id="countryModal" class="hidden fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl border-4 border-slate-800 max-w-lg w-full overflow-hidden shadow-2xl relative cartoon-border animate-fade-in">
+            <button onclick="closeCountryModal()" class="absolute top-3 right-3 w-10 h-10 bg-rose-400 text-slate-900 rounded-full border-2 border-slate-800 flex items-center justify-center font-black text-lg hover:bg-rose-500 z-10">
+                ✕
+            </button>
+            <div id="modalImageContainer" class="h-60 bg-slate-100 border-b-4 border-slate-800 overflow-hidden relative">
+                <img id="modalImage" src="" alt="Country" class="w-full h-full object-cover">
+                <span id="modalBadge" class="absolute bottom-3 left-3 bg-brand-yellow text-slate-800 font-black text-xs px-3 py-1 rounded-full border-2 border-slate-800"></span>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <h3 id="modalTitle" class="text-2xl font-black text-slate-800"></h3>
+                    <p id="modalTagline" class="text-sm font-bold text-brand-purple"></p>
+                </div>
+                <p id="modalDesc" class="text-sm font-bold text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-2xl border-2 border-slate-200"></p>
+                <button id="modalAudioBtn" onclick="" class="cartoon-btn w-full bg-amber-200 hover:bg-amber-300 font-black text-sm py-3 rounded-2xl flex items-center justify-center gap-2 text-slate-800">
+                    🔊 廣東話導覽朗讀
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t-4 border-slate-800 mt-12 py-6 px-4 text-center">
+        <div class="max-w-7xl mx-auto space-y-2">
+            <p class="font-black text-sm text-slate-800">
+                🌈 繽紛小學圖書館數位閱讀平台 • 快樂學習 探索無限 📚
+            </p>
+            <p class="text-xs font-bold text-slate-500">
+                內容為繁體中文 | 配備粵語 (Cantonese zh-HK) 語音合成導覽
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        /* Country Data Directory for Modal & Speech */
+        const COUNTRY_DATA = {
+            austria: {
+                title: '🇦🇹 奧地利 (Austria)',
+                badge: '工藝與音樂之都',
+                tagline: '「最熱愛木製品與音樂的國度」',
+                desc: '奧地利擁有大片美麗的阿爾卑斯山脈森林，當地傳統手藝人極其擅長製作精緻木雕與玩具。首都維也納更是世界著名的音樂之都，出了無數音樂巨匠！',
+                image: 'https://images.unsplash.com/photo-1516483638261-f4dbaf036963?auto=format&fit=crop&w=800&q=80',
+                speech: '奧地利：最熱愛木製品與音樂的國度。擁有美麗森林與精緻傳統木雕手藝，首都維也納是世界音樂之都！'
+            },
+            belgium: {
+                title: '🇧🇪 比利時 (Belgium)',
+                badge: '歐洲心臟首都',
+                tagline: '「歐盟總部與朱古力王國」',
+                desc: '首都布魯塞爾是大廣場與歐盟總部所在地！這裡有全世界小朋友最愛的美味朱古力、酥脆鬆餅，還有許許多多經典動漫故事的發源地！',
+                image: 'https://images.unsplash.com/photo-1559563458-527698bf5295?auto=format&fit=crop&w=800&q=80',
+                speech: '比利時：歐洲最重要的心臟首都。首都布魯塞爾有輝煌的大廣場與歐盟總部，還有世界聞名的美味朱古力！'
+            },
+            uk: {
+                title: '🇬🇧 英國 (United Kingdom)',
+                badge: '說故事的公園長椅',
+                tagline: '「滿載童話與古典歷史的國家」',
+                desc: '在英國倫敦的許多美麗公園與街頭，設有帶有故事紀念銘牌，甚至是特製成打開書本造型的故事長椅，讓路人在休憩時能細細閱讀精彩故事！',
+                image: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=800&q=80',
+                speech: '英國：會講故事的公園長椅。倫敦公園裡到處都是帶有故事銘牌或做成開放書本造型的故事長椅！'
+            },
+            czech: {
+                title: '🇨🇿 捷克 (Czech Republic)',
+                badge: '金色童話之都',
+                tagline: '「璀璨如夢境般的城堡與尖塔」',
+                desc: '首都布拉格被稱為「金色城市」，在傍晚夕陽照射下，無數哥德式高聳尖塔與布拉格城堡散發出金黃光芒，彷彿讓人一瞬間走進了童話王國！',
+                image: 'https://images.unsplash.com/photo-1541849546-216549ae216d?auto=format&fit=crop&w=800&q=80',
+                speech: '捷克：璀璨童話般的金色城市。首都布拉格在夕陽照耀下，金色城堡與哥德式尖塔閃閃發光！'
+            },
+            denmark: {
+                title: '🇩🇰 丹麥 (Denmark)',
+                badge: '童話大師安徒生',
+                tagline: '「哥本哈根的美人魚與彩色港口」',
+                desc: '丹麥是偉大童話作家安徒生的故鄉！在首都哥本哈根的海邊矗立著著名的《小美人魚》雕像，周圍更建滿五彩繽紛的溫馨童話小屋。',
+                image: 'https://images.unsplash.com/photo-1513622470522-26c3c8a854bc?auto=format&fit=crop&w=800&q=80',
+                speech: '丹麥：童話大師安徒生的家鄉。首都哥本哈根海邊有著名的小美人魚雕像與五彩繽紛的童話房屋！'
+            },
+            france: {
+                title: '🇫🇷 法國 (France)',
+                badge: '世界香水之都',
+                tagline: '「格拉斯紫色薰衣草花海與芳香」',
+                desc: '位於法國南部的香水小鎮格拉斯種滿了夢幻般的紫藍色薰衣草與各式花卉，擁有百年調香技術，能調配出全世界最芬芳撲鼻的香水！',
+                image: 'https://images.unsplash.com/photo-1528698827591-e19ccd7bc23d?auto=format&fit=crop&w=800&q=80',
+                speech: '法國：飄香百年的世界香水之都。格拉斯擁有一片片紫色薰衣草花海，調配出世界頂級的香水！'
+            }
+        };
+
+        function openCountryModal(key) {
+            const data = COUNTRY_DATA[key];
+            if (!data) return;
+
+            stopSpeech();
+            playSound('click');
+
+            document.getElementById('modalImage').src = data.image;
+            document.getElementById('modalBadge').textContent = data.badge;
+            document.getElementById('modalTitle').textContent = data.title;
+            document.getElementById('modalTagline').textContent = data.tagline;
+            document.getElementById('modalDesc').textContent = data.desc;
+            
+            const btn = document.getElementById('modalAudioBtn');
+            btn.onclick = function() {
+                speakText(data.speech, btn);
+            };
+
+            document.getElementById('countryModal').classList.remove('hidden');
+        }
+
+        function closeCountryModal() {
+            stopSpeech();
+            playSound('click');
+            document.getElementById('countryModal').classList.add('hidden');
+        }
+
+        /* Web Audio API Sound Generator */
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new AudioCtx();
+            }
+        }
+
+        function playSound(type) {
+            try {
+                initAudio();
+                if (!audioCtx) return;
+
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'catch') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15);
+                    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.15);
+                } else if (type === 'warning') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                    osc.frequency.setValueAtTime(100, audioCtx.currentTime + 0.1);
+                    gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.3);
+                } else if (type === 'click') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.05);
+                }
+            } catch (e) {
+                console.log("Audio play suppressed");
+            }
+        }
+
+        /* Cantonese Speech Synthesis */
+        function stopSpeech() {
+            if (window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+            }
+            document.querySelectorAll('.speech-active').forEach(el => el.classList.remove('speech-active'));
+        }
+
+        function speakText(text, btnElement = null) {
+            initAudio();
+            playSound('click');
+
+            if (!('speechSynthesis' in window)) return;
+
+            stopSpeech();
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'zh-HK';
+            utterance.rate = 0.9;
+            utterance.pitch = 1.1;
+
+            if (btnElement) {
+                btnElement.classList.add('speech-active');
+            }
+
+            utterance.onend = function() {
+                if (btnElement) btnElement.classList.remove('speech-active');
+            };
+
+            utterance.onerror = function() {
+                if (btnElement) btnElement.classList.remove('speech-active');
+            };
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        /* Catch Game Logic */
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        let gameRunning = false;
+        let score = 0;
+        let streak = 0;
+        let highScore = 0;
+        let timeLeft = 60;
+        let timerInterval = null;
+        let items = [];
+        let itemSpawnTimer = 0;
+
+        const basket = {
+            x: 0,
+            y: 0,
+            width: 80,
+            height: 40,
+            speed: 8
+        };
+
+        const GOOD_ITEMS = [
+            { emoji: '📚', name: '圖書' },
+            { emoji: '📖', name: '故事書' },
+            { emoji: '📕', name: '紅皮書' },
+            { emoji: '📘', name: '藍皮書' },
+            { emoji: '📗', name: '綠皮書' },
+            { emoji: '📙', name: '橙皮書' }
+        ];
+
+        const BAD_ITEMS = [
+            { emoji: '🤫', name: '吵鬧喧嘩' },
+            { emoji: '🗣️', name: '大聲講話' },
+            { emoji: '🍔', name: '漢堡包' },
+            { emoji: '🍕', name: '披薩' },
+            { emoji: '🥤', name: '汽水飲料' },
+            { emoji: '🧃', name: '果汁盒' }
+        ];
+
+        const keys = {};
+        window.addEventListener('keydown', e => {
+            keys[e.key] = true;
+            if (['ArrowLeft', 'ArrowRight', ' '].includes(e.key)) e.preventDefault();
+        });
+        window.addEventListener('keyup', e => keys[e.key] = false);
+
+        function moveLeft(active) { keys['ArrowLeft'] = active; }
+        function moveRight(active) { keys['ArrowRight'] = active; }
+
+        function handlePointerMove(e) {
+            if (!gameRunning) return;
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const mouseX = clientX - rect.left;
+            basket.x = Math.max(0, Math.min(canvas.width - basket.width, mouseX - basket.width / 2));
+        }
+
+        canvas.addEventListener('mousemove', handlePointerMove);
+        canvas.addEventListener('touchmove', handlePointerMove);
+
+        function startGame() {
+            initAudio();
+            stopSpeech();
+
+            document.getElementById('gameOverlay').classList.add('hidden');
+            score = 0;
+            streak = 0;
+            timeLeft = 60;
+            items = [];
+            gameRunning = true;
+
+            basket.width = Math.max(70, canvas.width * 0.15);
+            basket.x = canvas.width / 2 - basket.width / 2;
+            basket.y = canvas.height - 60;
+
+            document.getElementById('game-score').textContent = score;
+            document.getElementById('game-streak').textContent = streak;
+            document.getElementById('game-timer').textContent = `${timeLeft}s`;
+
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('game-timer').textContent = `${timeLeft}s`;
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function endGame() {
+            gameRunning = false;
+            clearInterval(timerInterval);
+
+            if (score > highScore) {
+                highScore = score;
+                document.getElementById('game-highscore').textContent = highScore;
+            }
+
+            document.getElementById('overlayEmoji').textContent = '🎉';
+            document.getElementById('overlayTitle').textContent = '時間到！遊戲結束';
+            document.getElementById('overlayDesc').innerHTML = `
+                你在圖書館表現得非常出色！<br/>
+                <b>最終得分：<span class="text-yellow-300 text-2xl">${score}</span> 分</b><br/>
+                最高連擊數：<b>${streak}</b> 次
+            `;
+            document.getElementById('startBtn').textContent = '🔄 再玩一次';
+            document.getElementById('gameOverlay').classList.remove('hidden');
+        }
+
+        function triggerWarningVisual() {
+            const banner = document.getElementById('warningBanner');
+            banner.classList.remove('hidden');
+            setTimeout(() => banner.classList.add('hidden'), 1000);
+        }
+
+        function gameLoop() {
+            if (!gameRunning) return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (keys['ArrowLeft'] || keys['a'] || keys['A']) {
+                basket.x -= basket.speed;
+            }
+            if (keys['ArrowRight'] || keys['d'] || keys['D']) {
+                basket.x += basket.speed;
+            }
+            basket.x = Math.max(0, Math.min(canvas.width - basket.width, basket.x));
+
+            // Basket
+            ctx.fillStyle = '#FFD166';
+            ctx.strokeStyle = '#2B2D42';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.roundRect(basket.x, basket.y, basket.width, basket.height, 12);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = '#2B2D42';
+            ctx.font = 'bold 16px "Noto Sans TC"';
+            ctx.textAlign = 'center';
+            ctx.fillText('🧺 圖書籃', basket.x + basket.width / 2, basket.y + 26);
+
+            // Spawning
+            itemSpawnTimer++;
+            if (itemSpawnTimer > 35) {
+                itemSpawnTimer = 0;
+                const isGood = Math.random() > 0.35;
+                const itemData = isGood ? 
+                    GOOD_ITEMS[Math.floor(Math.random() * GOOD_ITEMS.length)] : 
+                    BAD_ITEMS[Math.floor(Math.random() * BAD_ITEMS.length)];
+
+                items.push({
+                    x: Math.random() * (canvas.width - 40) + 20,
+                    y: -30,
+                    size: 32,
+                    speed: Math.random() * 2 + 3,
+                    isGood: isGood,
+                    emoji: itemData.emoji
+                });
+            }
+
+            // Fall animation & Collision
+            for (let i = items.length - 1; i >= 0; i--) {
+                const item = items[i];
+                item.y += item.speed;
+
+                ctx.font = `${item.size}px serif`;
+                ctx.textAlign = 'center';
+                ctx.fillText(item.emoji, item.x, item.y);
+
+                if (
+                    item.y + item.size / 2 >= basket.y &&
+                    item.y - item.size / 2 <= basket.y + basket.height &&
+                    item.x >= basket.x &&
+                    item.x <= basket.x + basket.width
+                ) {
+                    if (item.isGood) {
+                        score += 10;
+                        streak++;
+                        playSound('catch');
+                    } else {
+                        score = Math.max(0, score - 10);
+                        streak = 0;
+                        playSound('warning');
+                        triggerWarningVisual();
+                    }
+
+                    document.getElementById('game-score').textContent = score;
+                    document.getElementById('game-streak').textContent = streak;
+                    items.splice(i, 1);
+                    continue;
+                }
+
+                if (item.y > canvas.height + 40) {
+                    items.splice(i, 1);
+                }
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        window.onload = function() {
+            resizeCanvas();
+        };
+    </script>
+</body>
+</html>
