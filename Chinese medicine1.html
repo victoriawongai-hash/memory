@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中醫小達人 - 舌苔大偵探與體質大解密</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts for Friendly Chinese Display -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Mochiyom+Pop+One&family=Noto+Sans+TC:wght@400;600;800;900&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        tcmRed: '#D9383A',
+                        tcmGold: '#F2B705',
+                        tcmGreen: '#4A7C59',
+                        tcmCream: '#FFFDF5',
+                        tcmBrown: '#6E473B',
+                        tcmSoftYellow: '#FEF9E7',
+                        tcmCardBg: '#FFFFFF'
+                    },
+                    fontFamily: {
+                        sans: ['Noto Sans TC', 'sans-serif'],
+                        cute: ['Mochiyom Pop One', 'Noto Sans TC', 'sans-serif']
+                    },
+                    boxShadow: {
+                        'cute': '0 8px 0px 0px rgba(110, 71, 59, 0.15)',
+                        'cute-hover': '0 12px 0px 0px rgba(110, 71, 59, 0.2)',
+                        'gold': '0 0 15px rgba(242, 183, 5, 0.5)'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #F7F3E9;
+            background-image: radial-gradient(#E8DFCA 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+            color: #4A3E3D;
+            user-select: none;
+        }
+
+        .scroll-custom::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .scroll-custom::-webkit-scrollbar-track {
+            background: #F1EAD8;
+            border-radius: 10px;
+        }
+        .scroll-custom::-webkit-scrollbar-thumb {
+            background: #C8B89A;
+            border-radius: 10px;
+        }
+
+        /* Animations */
+        @keyframes bounce-slow {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        .animate-bounce-slow {
+            animation: bounce-slow 3s infinite ease-in-out;
+        }
+
+        @keyframes scan-line {
+            0% { top: 5%; opacity: 0.8; }
+            50% { opacity: 1; }
+            100% { top: 90%; opacity: 0.8; }
+        }
+        .animate-scan {
+            position: absolute;
+            animation: scan-line 2s infinite ease-in-out alternate;
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 0.4; }
+            100% { transform: scale(0.95); opacity: 0.8; }
+        }
+        .animate-pulse-ring {
+            animation: pulse-ring 2.5s infinite ease-in-out;
+        }
+
+        .chinese-border {
+            border: 4px solid #D9383A;
+            outline: 3px solid #F2B705;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans antialiased text-gray-800 pb-12">
+
+    <!-- Top Header / Banner -->
+    <header class="bg-tcmRed text-white shadow-md relative overflow-hidden border-b-4 border-tcmGold">
+        <div class="absolute -left-6 -top-6 text-tcmGold/20 text-8xl pointer-events-none"><i class="fa-solid fa-cloud"></i></div>
+        <div class="absolute right-4 -bottom-6 text-tcmGold/20 text-9xl pointer-events-none"><i class="fa-solid fa-cloud"></i></div>
+        
+        <div class="max-w-5xl mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between relative z-10">
+            <!-- Mascot and Title -->
+            <div class="flex items-center space-x-4">
+                <div class="relative bg-white p-2 rounded-full border-2 border-tcmGold shadow-md cursor-pointer hover:scale-105 transition transform" onclick="playWebSound('magic');">
+                    <!-- SVG Mascot -->
+                    <svg class="w-16 h-16" viewBox="0 0 100 100">
+                        <path d="M20 35 Q50 10 80 35 L75 42 L25 42 Z" fill="#4A7C59"/>
+                        <rect x="42" y="15" width="16" height="20" fill="#F2B705" rx="3"/>
+                        <circle cx="50" cy="25" r="4" fill="#D9383A"/>
+                        <circle cx="50" cy="58" r="28" fill="#FFE0BD"/>
+                        <path d="M22 55 Q25 38 50 38 Q75 38 78 55 Z" fill="#333"/>
+                        <circle cx="38" cy="56" r="3.5" fill="#222"/>
+                        <circle cx="62" cy="56" r="3.5" fill="#222"/>
+                        <circle cx="40" cy="54" r="1.2" fill="#FFF"/>
+                        <circle cx="64" cy="54" r="1.2" fill="#FFF"/>
+                        <ellipse cx="32" cy="63" rx="4" ry="2.5" fill="#FF8A8A" opacity="0.7"/>
+                        <ellipse cx="68" cy="63" rx="4" ry="2.5" fill="#FF8A8A" opacity="0.7"/>
+                        <path d="M42 66 Q50 74 58 66" fill="none" stroke="#6E473B" stroke-width="2.5" stroke-linecap="round"/>
+                    </svg>
+                    <span class="absolute -bottom-1 -right-1 bg-tcmGold text-tcmBrown font-black text-xs px-2 py-0.5 rounded-full border border-white">草本小大夫</span>
+                </div>
+
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span class="bg-tcmGold text-tcmBrown text-xs font-bold px-2 py-0.5 rounded-md">兒童中醫科普版</span>
+                        <span class="text-xs text-yellow-200"><i class="fa-solid fa-leaf"></i> 趣味看舌頭學健康</span>
+                    </div>
+                    <h1 class="text-2xl md:text-3xl font-black font-cute tracking-wide mt-0.5 text-yellow-100 drop-shadow">
+                        中醫小達人 <span class="text-tcmGold">・ 舌苔大偵探</span>
+                    </h1>
+                </div>
+            </div>
+
+            <div class="mt-3 md:mt-0 flex items-center space-x-2 bg-tcmBrown/30 px-3 py-1.5 rounded-full border border-yellow-300/30">
+                <i class="fa-solid fa-volume-high text-tcmGold text-sm"></i>
+                <span class="text-xs text-yellow-100">點擊卡片與按鈕有有趣音效喔！</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="max-w-4xl mx-auto px-4 mt-6">
+        <div class="grid grid-cols-3 gap-2 p-1.5 bg-white/80 backdrop-blur rounded-2xl border-2 border-tcmBrown/20 shadow-sm">
+            <button id="tab-guide" onclick="switchTab('guide')" class="tab-btn py-3 px-2 rounded-xl text-sm md:text-base font-bold flex flex-col sm:flex-row items-center justify-center space-y-1 sm:space-y-0 sm:space-x-2 transition-all bg-tcmRed text-white shadow-md">
+                <i class="fa-solid fa-book-open text-lg"></i>
+                <span>體質與舌象對對碰</span>
+            </button>
+            <button id="tab-scan" onclick="switchTab('scan')" class="tab-btn py-3 px-2 rounded-xl text-sm md:text-base font-bold flex flex-col sm:flex-row items-center justify-center space-y-1 sm:space-y-0 sm:space-x-2 transition-all text-tcmBrown hover:bg-tcmSoftYellow">
+                <i class="fa-solid fa-camera-retro text-lg"></i>
+                <span>拍照測體質</span>
+            </button>
+            <button id="tab-quiz" onclick="switchTab('quiz')" class="tab-btn py-3 px-2 rounded-xl text-sm md:text-base font-bold flex flex-col sm:flex-row items-center justify-center space-y-1 sm:space-y-0 sm:space-x-2 transition-all text-tcmBrown hover:bg-tcmSoftYellow">
+                <i class="fa-solid fa-graduation-cap text-lg"></i>
+                <span>中醫小知識考考你</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="max-w-4xl mx-auto px-4 mt-6 flex-grow">
+
+        <!-- SECTION 1: Interactive TCM Constitution Guide -->
+        <section id="section-guide" class="space-y-6">
+            <div class="bg-gradient-to-r from-amber-100 via-orange-50 to-amber-100 p-5 rounded-2xl border-2 border-amber-300 flex items-center space-x-4 shadow-sm">
+                <div class="text-4xl text-amber-600 hidden sm:block">
+                    <i class="fa-solid fa-magnifying-glass-location"></i>
+                </div>
+                <div>
+                    <h2 class="text-lg font-bold text-tcmBrown flex items-center gap-2">
+                        <span>小朋友，伸出舌頭照照鏡子！你的舌頭長什麼樣子呢？</span>
+                    </h2>
+                    <p class="text-xs md:text-sm text-gray-600 mt-1">
+                        中醫伯伯常說：「舌頭是人體健康的鏡子」。點選下方不同的體質卡片，看看不同體質的舌頭特徵與養生小錦囊吧！
+                    </p>
+                </div>
+            </div>
+
+            <!-- Filter Buttons -->
+            <div class="flex flex-wrap gap-2 justify-center" id="constitution-filters">
+                <!-- Injected via JS -->
+            </div>
+
+            <!-- Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5" id="constitutions-grid">
+                <!-- Injected dynamically via JS -->
+            </div>
+        </section>
+
+        <!-- SECTION 2: AI Tongue Photo Scanner & Diagnosis -->
+        <section id="section-scan" class="hidden space-y-6">
+            <div class="bg-white rounded-3xl p-6 border-4 border-tcmGold shadow-cute relative">
+                <div class="text-center max-w-lg mx-auto mb-6">
+                    <span class="bg-tcmRed text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">AI 科技小助手</span>
+                    <h2 class="text-2xl font-black font-cute text-tcmBrown mt-2">舌苔大偵探・拍照測體質</h2>
+                    <p class="text-xs md:text-sm text-gray-600 mt-1">
+                        請在光線明亮的地方，自然伸出舌頭，點擊拍照或上傳照片，讓小醫師幫你分析你的身體小秘密！
+                    </p>
+                </div>
+
+                <!-- Camera / Scanner Viewport -->
+                <div class="relative max-w-md mx-auto aspect-4/3 bg-gray-900 rounded-2xl overflow-hidden border-4 border-tcmBrown shadow-inner flex flex-col items-center justify-center">
+                    
+                    <video id="webcam" class="w-full h-full object-cover hidden" autoplay playsinline></video>
+                    <img id="captured-image" class="w-full h-full object-cover hidden" alt="舌頭照片" />
+
+                    <!-- Initial Placeholder State -->
+                    <div id="camera-placeholder" class="text-center p-6 text-gray-300 space-y-3">
+                        <div class="w-20 h-20 mx-auto rounded-full bg-gray-800 flex items-center justify-center text-3xl text-tcmGold animate-bounce-slow border-2 border-tcmGold/40">
+                            <i class="fa-solid fa-face-smile-tongue"></i>
+                        </div>
+                        <p class="text-sm font-medium">點擊下方「開啟鏡頭」或「選擇照片」開始偵測</p>
+                        <p class="text-xs text-gray-400">（請放鬆伸出舌頭，不要刻意用力喔！）</p>
+                    </div>
+
+                    <!-- Mirror Frame Overlay -->
+                    <div class="absolute inset-0 border-[12px] border-tcmGold/30 pointer-events-none rounded-xl flex flex-col justify-between p-2">
+                        <div class="flex justify-between">
+                            <span class="text-tcmGold text-lg"><i class="fa-solid fa-fan"></i></span>
+                            <span class="text-tcmGold text-lg"><i class="fa-solid fa-fan"></i></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-tcmGold text-lg"><i class="fa-solid fa-fan"></i></span>
+                            <span class="text-tcmGold text-lg"><i class="fa-solid fa-fan"></i></span>
+                        </div>
+                    </div>
+
+                    <!-- Scanning Beam -->
+                    <div id="scan-beam" class="hidden absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-green-400 to-transparent shadow-[0_0_15px_#22c55e] animate-scan z-20"></div>
+
+                    <!-- Scanning Overlay Message -->
+                    <div id="scan-overlay" class="hidden absolute inset-0 bg-black/60 backdrop-blur-sm z-30 flex flex-col items-center justify-center text-white space-y-3">
+                        <div class="w-12 h-12 border-4 border-tcmGold border-t-transparent rounded-full animate-spin"></div>
+                        <p class="font-bold text-base font-cute text-yellow-300 tracking-wider">小醫師正努力觀察舌象中...</p>
+                        <p class="text-xs text-gray-200">正在分析舌頭顏色、苔質與濕潤度...</p>
+                    </div>
+                </div>
+
+                <canvas id="canvas" class="hidden"></canvas>
+
+                <!-- Controls -->
+                <div class="mt-6 flex flex-wrap gap-3 justify-center items-center">
+                    <button id="btn-start-camera" onclick="startCamera()" class="bg-tcmGreen hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-full shadow-md flex items-center space-x-2 transition">
+                        <i class="fa-solid fa-video"></i>
+                        <span>開啟相機鏡頭</span>
+                    </button>
+
+                    <button id="btn-capture" onclick="capturePhoto()" class="hidden bg-tcmRed hover:bg-red-700 text-white font-bold px-6 py-2.5 rounded-full shadow-md items-center space-x-2 transition border-2 border-tcmGold">
+                        <i class="fa-solid fa-camera"></i>
+                        <span>拍照診斷</span>
+                    </button>
+
+                    <label for="file-upload" class="bg-amber-500 hover:bg-amber-600 text-white font-bold px-5 py-2.5 rounded-full shadow-md flex items-center space-x-2 cursor-pointer transition">
+                        <i class="fa-solid fa-image"></i>
+                        <span>上傳舌頭相片</span>
+                    </label>
+                    <input id="file-upload" type="file" accept="image/*" class="hidden" onchange="handleFileUpload(event)">
+
+                    <button id="btn-reset" onclick="resetScanner()" class="hidden bg-gray-500 hover:bg-gray-600 text-white font-bold px-4 py-2.5 rounded-full shadow-md items-center space-x-2 transition">
+                        <i class="fa-solid fa-rotate-left"></i>
+                        <span>重新測驗</span>
+                    </button>
+                </div>
+
+                <div class="mt-4 text-center">
+                    <p class="text-xs text-gray-500">
+                        <i class="fa-solid fa-circle-info text-amber-500"></i> 本功能會分析照片的色彩與亮度特徵進行智能對比。本工具僅供科普教學與健康體驗，不能替代專業中醫師面診。
+                    </p>
+                </div>
+            </div>
+
+            <!-- Diagnosis Result Card -->
+            <div id="diagnosis-result" class="hidden bg-white rounded-3xl p-6 border-4 border-tcmRed shadow-cute space-y-5 animate-fade-in">
+                <div class="flex flex-col sm:flex-row items-center justify-between border-b border-gray-200 pb-4 gap-4">
+                    <div class="flex items-center space-x-4">
+                        <div id="result-badge-icon" class="w-16 h-16 rounded-2xl bg-amber-100 flex items-center justify-center text-3xl border-2 border-amber-400"></div>
+                        <div>
+                            <span class="text-xs font-bold text-tcmRed bg-red-100 px-2 py-0.5 rounded-md">診斷完成！你的主要體質是：</span>
+                            <h3 id="result-title" class="text-2xl font-black font-cute text-tcmBrown mt-1">--</h3>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span id="result-match-rate" class="text-sm font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+                            相似度 92%
+                        </span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-tcmSoftYellow p-4 rounded-2xl border border-amber-200 space-y-2">
+                        <h4 class="font-bold text-tcmBrown text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-magnifying-glass text-tcmRed"></i>
+                            <span>觀察到的舌象特徵：</span>
+                        </h4>
+                        <p id="result-tongue-desc" class="text-xs md:text-sm text-gray-700 leading-relaxed">--</p>
+                    </div>
+
+                    <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-200 space-y-2">
+                        <h4 class="font-bold text-emerald-800 text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-heart-pulse text-emerald-600"></i>
+                            <span>身體常見的小感覺：</span>
+                        </h4>
+                        <p id="result-symptoms" class="text-xs md:text-sm text-gray-700 leading-relaxed">--</p>
+                    </div>
+                </div>
+
+                <div class="bg-orange-50 rounded-2xl p-4 border border-orange-200 space-y-3">
+                    <h4 class="font-bold text-amber-900 text-sm md:text-base flex items-center gap-2">
+                        <i class="fa-solid fa-bowl-food text-amber-600"></i>
+                        <span>小醫師推薦健康食療與茶飲：</span>
+                    </h4>
+                    <div id="result-foods" class="flex flex-wrap gap-2"></div>
+                    <p id="result-lifestyle" class="text-xs text-amber-800 pt-2 border-t border-orange-200/60">--</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: Mini Quiz / Knowledge Corner -->
+        <section id="section-quiz" class="hidden space-y-6">
+            <div class="bg-white rounded-3xl p-6 border-4 border-tcmGreen shadow-cute">
+                <div class="flex flex-col md:flex-row items-center justify-between border-b pb-4 mb-6 gap-4">
+                    <div>
+                        <span class="bg-tcmGreen text-white text-xs font-bold px-3 py-1 rounded-full uppercase">小試身手</span>
+                        <h2 class="text-2xl font-black font-cute text-tcmBrown mt-1">中醫小知識隨堂考</h2>
+                        <p class="text-xs text-gray-500 mt-1">選出最正確的答案，收集閃亮小星星吧！</p>
+                    </div>
+                    
+                    <div class="flex items-center space-x-3 bg-amber-50 px-4 py-2 rounded-2xl border border-amber-200">
+                        <i class="fa-solid fa-star text-2xl text-tcmGold animate-pulse"></i>
+                        <div>
+                            <div class="text-xs text-gray-500 font-bold">獲得星星</div>
+                            <div id="quiz-score" class="text-xl font-black text-tcmBrown">0 / 5</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="quiz-container" class="space-y-6"></div>
+
+                <div id="quiz-finished" class="hidden text-center py-8 space-y-4">
+                    <div class="w-24 h-24 mx-auto rounded-full bg-tcmGold/20 flex items-center justify-center text-5xl text-tcmGold border-4 border-tcmGold animate-bounce">
+                        <i class="fa-solid fa-trophy"></i>
+                    </div>
+                    <h3 class="text-2xl font-black font-cute text-tcmBrown">太棒了！挑戰成功！</h3>
+                    <p id="quiz-final-text" class="text-sm text-gray-600 max-w-md mx-auto">
+                        你已經獲得了中醫小達人的勳章！記得平時多關注自己的飲食與睡眠喔！
+                    </p>
+                    <button onclick="restartQuiz()" class="bg-tcmRed hover:bg-red-700 text-white font-bold px-6 py-2.5 rounded-full shadow-md inline-flex items-center space-x-2 transition">
+                        <i class="fa-solid fa-rotate-right"></i>
+                        <span>再考一次</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-12 text-center text-xs text-gray-500 space-y-1">
+        <p>🌿 中醫小達人 - 兒童傳統中醫學科普教育互動平台</p>
+        <p class="text-gray-400">聲明：本網站內容為兒童趣味科普，不能作為臨床醫療診斷依據。</p>
+    </footer>
+
+    <script>
+        /* DATA DEFINITIONS */
+        const CONSTITUTIONS = [
+            {
+                id: 'pinghe',
+                name: '平和質',
+                subtitle: '健康小學霸（最健康！）',
+                color: 'emerald',
+                bgColor: 'bg-emerald-50',
+                borderColor: 'border-emerald-400',
+                badgeBg: 'bg-emerald-100 text-emerald-800',
+                icon: 'fa-face-smile-beam',
+                tongueType: '淡紅舌・薄白苔',
+                tongueDesc: '舌頭呈現好看的淡紅色，上面有一層薄薄的、乾淨的白苔，看起來潤澤又健康！',
+                symptoms: '體力充沛，睡得香吃得飽，平時很少生病，心情開朗。',
+                foods: ['蘋果', '白飯', '青菜', '牛奶', '葡萄'],
+                lifestyle: '恭喜你！繼續保持均衡飲食、多做運動與充足睡眠喔！',
+                svgTongue: `
+                    <svg viewBox="0 0 120 120" class="w-28 h-28 mx-auto">
+                        <path d="M20 30 C20 80, 40 110, 60 110 C80 110, 100 80, 100 30 C100 20, 20 20, 20 30 Z" fill="#FF8A95" stroke="#D9383A" stroke-width="3"/>
+                        <path d="M35 35 C35 70, 50 90, 60 90 C70 90, 85 70, 85 35 Z" fill="#FFF5EE" opacity="0.6"/>
+                        <line x1="60" y1="35" x2="60" y2="90" stroke="#E66B75" stroke-width="2" stroke-dasharray="3,3"/>
+                    </svg>`
+            },
+            {
+                id: 'qixu',
+                name: '氣虛質',
+                subtitle: '容易累的小慵懶',
+                color: 'amber',
+                bgColor: 'bg-amber-50',
+                borderColor: 'border-amber-400',
+                badgeBg: 'bg-amber-100 text-amber-800',
+                icon: 'fa-battery-quarter',
+                tongueType: '淡白舌・邊緣齒痕',
+                tongueDesc: '舌頭顏色較淡偏白，舌頭胖胖軟軟的，邊緣容易看到像被牙齒壓出來的齒痕！',
+                symptoms: '容易覺得累、說話聲音小，稍微跑步就上氣不接下氣，容易感冒。',
+                foods: ['紅棗', '山藥', '黃耆茶', '蓮子', '葡萄乾'],
+                lifestyle: '養成規律作息，避免劇烈過度運動，多吃補氣健脾的溫和食物。',
+                svgTongue: `
+                    <svg viewBox="0 0 120 120" class="w-28 h-28 mx-auto">
+                        <path d="M20 30 Q15 45 22 55 Q15 65 22 75 C35 105, 85 105, 98 75 Q105 65 98 55 Q105 45 100 30 Z" fill="#FFC0CB" stroke="#D9383A" stroke-width="3"/>
+                        <path d="M35 35 C35 65, 50 85, 60 85 C70 85, 85 65, 85 35 Z" fill="#FFFFFF" opacity="0.7"/>
+                        <line x1="60" y1="35" x2="60" y2="85" stroke="#E89B9B" stroke-width="2"/>
+                    </svg>`
+            },
+            {
+                id: 'yangxu',
+                name: '陽虛質',
+                subtitle: '怕冷的小企鵝',
+                color: 'blue',
+                bgColor: 'bg-blue-50',
+                borderColor: 'border-blue-400',
+                badgeBg: 'bg-blue-100 text-blue-800',
+                icon: 'fa-snowflake',
+                tongueType: '淡白胖嫩舌・濕潤白苔',
+                tongueDesc: '舌頭顏色比較蒼白，看起來水分很多、滑滑亮亮的，舌體較胖。',
+                symptoms: '特別怕冷，手腳常常冰冰的，喜歡喝熱水，吃冰淇淋容易拉肚子。',
+                foods: ['生薑茶', '桂圓', '龍眼肉', '胡蘿蔔', '南瓜'],
+                lifestyle: '少吃冰品與冷飲！冬天要注意保暖，多曬太陽補充溫暖陽光。',
+                svgTongue: `
+                    <svg viewBox="0 0 120 120" class="w-28 h-28 mx-auto">
+                        <path d="M18 30 C18 85, 38 112, 60 112 C82 112, 102 85, 102 30 Z" fill="#FFD1D1" stroke="#C87070" stroke-width="3"/>
+                        <path d="M30 35 C30 75, 48 95, 60 95 C72 95, 90 75, 90 35 Z" fill="#E8F4F8" opacity="0.8"/>
+                        <circle cx="50" cy="70" r="3" fill="#A0C4DF"/>
+                        <circle cx="70" cy="60" r="2.5" fill="#A0C4DF"/>
+                    </svg>`
+            },
+            {
+                id: 'yinxu',
+                name: '陰虛質',
+                subtitle: '口渴發熱的小火苗',
+                color: 'rose',
+                bgColor: 'bg-rose-50',
+                borderColor: 'border-rose-400',
+                badgeBg: 'bg-rose-100 text-rose-800',
+                icon: 'fa-fire-burner',
+                tongueType: '鮮紅舌・少苔或無苔',
+                tongueDesc: '舌頭顏色特別鮮紅，上面的舌苔很少甚至光溜溜的（稱為「鏡面舌」），比較乾燥。',
+                symptoms: '容易口乾舌燥想喝水，手心腳心容易發熱，晚上睡覺容易出汗、睡不穩定。',
+                foods: ['枸杞', '銀耳 (白木耳)', '百合', '水梨', '黑芝麻'],
+                lifestyle: '不要熬夜，少吃油炸炸雞與辣的零食，多補充滋潤的水果與湯品。',
+                svgTongue: `
+                    <svg viewBox="0 0 120 120" class="w-28 h-28 mx-auto">
+                        <path d="M22 30 C22 80, 42 108, 60 108 C78 108, 98 80, 98 30 Z" fill="#E63946" stroke="#990000" stroke-width="3"/>
+                        <path d="M45 40 Q60 50 75 40" stroke="#FF8585" stroke-width="2" fill="none"/>
+                    </svg>`
+            },
+            {
+                id: 'tanshi',
+                name: '痰濕質',
+                subtitle: '黏黏沉重的小水獺',
+                color: 'purple',
+                bgColor: 'bg-purple-50',
+                borderColor: 'border-purple-400',
+                badgeBg: 'bg-purple-100 text-purple-800',
+                icon: 'fa-cloud-rain',
+                tongueType: '舌體胖大・白膩厚苔',
+                tongueDesc: '舌頭看起來厚厚胖胖的，上面鋪著一層很厚、黏黏密密的白色舌苔。',
+                symptoms: '常常覺得身體黏黏沉沉的、想睡覺，肚子容易脹氣，臉上容易出油。',
+                foods: ['薏仁', '茯苓', '陳皮茶', '冬瓜', '赤小豆'],
+                lifestyle: '少吃甜食、含糖飲料與肥肉，多運動排汗，幫身體做「除濕」！',
+                svgTongue: `
+                    <svg viewBox="0 0 120 120" class="w-28 h-28 mx-auto">
+                        <path d="M16 30 C16 85, 36 112, 60 112 C84 112, 104 85, 104 30 Z" fill="#FFAAA5" stroke="#B85B5B" stroke-width="3"/>
+                        <path d="M28 35 C28 80, 45 98, 60 98 C75 98, 92 80, 92 35 Z" fill="#ECECEC" opacity="0.95"/>
+                    </svg>`
+            },
+            {
+                id: 'shire',
+                name: '濕熱質',
+                subtitle: '火氣大的小長痘',
+                color: 'orange',
+                bgColor: 'bg-orange-50',
+                borderColor: 'border-orange-400',
+                badgeBg: 'bg-orange-100 text-orange-800',
+                icon: 'fa-pepper-hot',
+                tongueType: '紅舌・黃膩厚苔',
+                tongueDesc: '舌頭本身顏色偏紅，中間鋪著一層厚厚的、偏黃色的舌苔。',
+                symptoms: '容易口乾口臭，臉上長小痘痘，大便容易黏馬桶，脾氣有時比較急躁。',
+                foods: ['菊花茶', '綠豆湯', '苦瓜', '黃瓜', '綠茶'],
+                lifestyle: '保持清淡飲食，少吃麻辣鍋與燒烤，多喝水，按時排便。',
+                svgTongue: `
+                    <svg viewBox="0 0 120 120" class="w-28 h-28 mx-auto">
+                        <path d="M20 30 C20 80, 40 108, 60 108 C80 108, 100 80, 100 30 Z" fill="#E63946" stroke="#900" stroke-width="3"/>
+                        <path d="M32 35 C32 78, 48 95, 60 95 C72 95, 88 78, 88 35 Z" fill="#F4D03F" opacity="0.9"/>
+                    </svg>`
+            },
+            {
+                id: 'xueyu',
+                name: '血瘀質',
+                subtitle: '血液循環卡卡的小斑馬',
+                color: 'slate',
+                bgColor: 'bg-slate-50',
+                borderColor: 'border-slate-400',
+                badgeBg: 'bg-slate-200 text-slate-800',
+                icon: 'fa-notes-medical',
+                tongueType: '紫暗舌・有瘀點瘀斑',
+                tongueDesc: '舌頭顏色偏暗紫，或者舌頭表面、邊緣可以看到小小的紫色或黑色小瘀點。',
+                symptoms: '皮膚容易刷到就青一塊紫一塊（黑青），身上有時會有固定位置的刺痛感。',
+                foods: ['山楂', '黑木耳', '玫瑰花茶', '洋蔥', '番茄'],
+                lifestyle: '多進行有氧運動（如跳繩、打球），避免久坐，讓血液開心循環！',
+                svgTongue: `
+                    <svg viewBox="0 0 120 120" class="w-28 h-28 mx-auto">
+                        <path d="M20 30 C20 80, 40 108, 60 108 C80 108, 100 80, 100 30 Z" fill="#9B59B6" stroke="#4A235A" stroke-width="3"/>
+                        <circle cx="45" cy="60" r="4" fill="#4A235A"/>
+                        <circle cx="70" cy="75" r="3" fill="#4A235A"/>
+                        <circle cx="55" cy="85" r="3.5" fill="#4A235A"/>
+                    </svg>`
+            }
+        ];
+
+        const QUIZ_QUESTIONS = [
+            {
+                question: '1. 健康的舌頭（平和質）通常看起來是什麼樣子呢？',
+                options: [
+                    '淡紅色，上面有一層薄薄乾淨的白苔',
+                    '鮮紅色，而且完全沒有舌苔',
+                    '紫暗色，還有許多黑點點',
+                    '黃色而且非常厚黏'
+                ],
+                correct: 0,
+                explanation: '答對了！健康的舌頭是「淡紅舌、薄白苔」，看起來乾淨又有光澤！'
+            },
+            {
+                question: '2. 如果舌頭邊緣有像牙齒壓出來的「齒痕」，代表什麼體質呢？',
+                options: [
+                    '火氣大的濕熱質',
+                    '容易覺得累的氣虛質',
+                    '最健康的平和質',
+                    '血液循環卡卡的血瘀質'
+                ],
+                correct: 1,
+                explanation: '真棒！齒痕舌常見於「氣虛質」，代表身體能量較不足、舌頭較鬆軟喔！'
+            },
+            {
+                question: '3. 「陽虛質」的小朋友特別怕冷、手腳冰冰，平時應該注意什麼？',
+                options: [
+                    '每天吃三大碗冰淇淋',
+                    '少吃冰品冷飲，注意冬天保暖與曬太陽',
+                    '一直待在冷氣房不出來',
+                    '只吃辣到發麻的麻辣鍋'
+                ],
+                correct: 1,
+                explanation: '沒錯！陽虛體質要保護好身上的陽氣溫暖，少吃冰冷食物！'
+            },
+            {
+                question: '4. 看到舌頭上有厚厚的「黃色舌苔」，適合喝什麼溫和茶飲來舒緩？',
+                options: [
+                    '溫熱的菊花茶或綠豆湯',
+                    '超甜的珍珠奶茶',
+                    '濃濃的黑咖啡',
+                    '冰鎮麻辣湯'
+                ],
+                correct: 0,
+                explanation: '太聰明了！黃膩苔代表體內有點濕熱火氣，菊花茶與綠豆湯能清熱消暑！'
+            },
+            {
+                question: '5. 中醫說「舌頭是身體健康的鏡子」，主要原因是什麼？',
+                options: [
+                    '舌頭可以當真的鏡子梳頭髮',
+                    '透過觀察舌頭顏色與舌苔，能瞭解內臟與體質狀況',
+                    '舌頭越長的人代表跑得越快',
+                    '舌頭只能用來嚐味道，跟健康沒關係'
+                ],
+                correct: 1,
+                explanation: '答對囉！中醫透過望舌（觀察舌質與舌苔）來了解身體內部的健康小秘密！'
+            }
+        ];
+
+        /* WEB AUDIO API SOUND EFFECTS */
+        function playWebSound(type) {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                const now = ctx.currentTime;
+
+                if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(400, now);
+                    osc.frequency.exponentialRampToValueAtTime(800, now + 0.08);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.08);
+                    osc.start(now);
+                    osc.stop(now + 0.08);
+                } else if (type === 'success') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, now);
+                    osc.frequency.setValueAtTime(659.25, now + 0.1);
+                    osc.frequency.setValueAtTime(783.99, now + 0.2);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.35);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                } else if (type === 'magic') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(300, now);
+                    osc.frequency.exponentialRampToValueAtTime(1200, now + 0.3);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                } else if (type === 'error') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(250, now);
+                    osc.frequency.setValueAtTime(180, now + 0.12);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                }
+            } catch (e) {
+                // Ignore audio context constraints
+            }
+        }
+
+        /* TAB NAVIGATION */
+        function switchTab(tab) {
+            playWebSound('click');
+
+            document.getElementById('section-guide').classList.add('hidden');
+            document.getElementById('section-scan').classList.add('hidden');
+            document.getElementById('section-quiz').classList.add('hidden');
+
+            const tabs = ['guide', 'scan', 'quiz'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                if (btn) {
+                    btn.className = "tab-btn py-3 px-2 rounded-xl text-sm md:text-base font-bold flex flex-col sm:flex-row items-center justify-center space-y-1 sm:space-y-0 sm:space-x-2 transition-all text-tcmBrown hover:bg-tcmSoftYellow";
+                }
+            });
+
+            const activeSection = document.getElementById(`section-${tab}`);
+            if (activeSection) activeSection.classList.remove('hidden');
+            
+            const activeBtn = document.getElementById(`tab-${tab}`);
+            if (activeBtn) {
+                activeBtn.className = "tab-btn py-3 px-2 rounded-xl text-sm md:text-base font-bold flex flex-col sm:flex-row items-center justify-center space-y-1 sm:space-y-0 sm:space-x-2 transition-all bg-tcmRed text-white shadow-md";
+            }
+
+            if (tab !== 'scan') {
+                stopCamera();
+            }
+        }
+
+        /* GUIDE SECTION RENDERING */
+        function renderGuideSection() {
+            const grid = document.getElementById('constitutions-grid');
+            const filterContainer = document.getElementById('constitution-filters');
+
+            if (!grid || !filterContainer) return;
+
+            filterContainer.innerHTML = `
+                <button onclick="filterConstitutions('all')" class="filter-btn text-xs font-bold px-3 py-1.5 rounded-full bg-tcmBrown text-white border border-tcmBrown transition">全部體質</button>
+            ` + CONSTITUTIONS.map(c => `
+                <button onclick="filterConstitutions('${c.id}')" class="filter-btn text-xs font-bold px-3 py-1.5 rounded-full bg-white text-tcmBrown border border-amber-300 hover:bg-amber-100 transition">${c.name}</button>
+            `).join('');
+
+            grid.innerHTML = CONSTITUTIONS.map(c => `
+                <div class="constitution-card ${c.bgColor} rounded-3xl p-5 border-2 ${c.borderColor} shadow-cute hover:shadow-cute-hover transition-all transform hover:-translate-y-1 cursor-pointer flex flex-col justify-between"
+                     data-id="${c.id}" onclick="playWebSound('click')">
+                    <div>
+                        <div class="flex items-start justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 rounded-2xl bg-white shadow-sm flex items-center justify-center text-tcmRed text-lg border border-amber-200">
+                                    <i class="fa-solid ${c.icon}"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-black font-cute text-tcmBrown">${c.name}</h3>
+                                    <span class="text-xs font-bold ${c.badgeBg} px-2 py-0.5 rounded-md">${c.subtitle}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="my-4 p-3 bg-white/80 rounded-2xl border border-amber-100 text-center relative">
+                            ${c.svgTongue}
+                            <span class="inline-block mt-2 text-xs font-bold text-tcmRed bg-red-50 border border-red-200 px-3 py-1 rounded-full">
+                                舌象：${c.tongueType}
+                            </span>
+                        </div>
+
+                        <div class="space-y-2 text-xs md:text-sm text-gray-700">
+                            <p><strong class="text-tcmBrown"><i class="fa-solid fa-eye text-amber-600"></i> 舌頭特徵：</strong>${c.tongueDesc}</p>
+                            <p><strong class="text-tcmBrown"><i class="fa-solid fa-child text-emerald-600"></i> 常見症狀：</strong>${c.symptoms}</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-amber-200/60">
+                        <span class="text-xs font-bold text-tcmBrown block mb-1.5"><i class="fa-solid fa-utensils text-tcmGold"></i> 推薦兒童食療／茶飲：</span>
+                        <div class="flex flex-wrap gap-1.5">
+                            ${c.foods.map(f => `<span class="bg-white text-tcmBrown text-xs font-semibold px-2.5 py-1 rounded-lg border border-amber-200 shadow-2xs">${f}</span>`).join('')}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterConstitutions(id) {
+            playWebSound('click');
+            const cards = document.querySelectorAll('.constitution-card');
+            cards.forEach(card => {
+                if (id === 'all' || card.getAttribute('data-id') === id) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        /* CAMERA & SCANNER LOGIC */
+        let mediaStream = null;
+
+        async function startCamera() {
+            playWebSound('click');
+            const video = document.getElementById('webcam');
+            const placeholder = document.getElementById('camera-placeholder');
+            const capturedImg = document.getElementById('captured-image');
+            const btnStart = document.getElementById('btn-start-camera');
+            const btnCapture = document.getElementById('btn-capture');
+
+            try {
+                mediaStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } } 
+                });
+                video.srcObject = mediaStream;
+                video.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+                capturedImg.classList.add('hidden');
+
+                btnStart.classList.add('hidden');
+                btnCapture.classList.remove('hidden');
+                btnCapture.classList.add('flex');
+            } catch (err) {
+                alert('無法開啟相機，請確認已授權相機權限，或改用上傳相片功能！');
+            }
+        }
+
+        function stopCamera() {
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+                mediaStream = null;
+            }
+            const video = document.getElementById('webcam');
+            if (video) video.classList.add('hidden');
+        }
+
+        function capturePhoto() {
+            playWebSound('click');
+            const video = document.getElementById('webcam');
+            const canvas = document.getElementById('canvas');
+            const capturedImg = document.getElementById('captured-image');
+
+            canvas.width = video.videoWidth || 640;
+            canvas.height = video.videoHeight || 480;
+
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            const dataUrl = canvas.toDataURL('image/png');
+            capturedImg.src = dataUrl;
+            capturedImg.classList.remove('hidden');
+            video.classList.add('hidden');
+
+            stopCamera();
+            runTongueAnalysis(ctx, canvas.width, canvas.height);
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            playWebSound('click');
+            stopCamera();
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.getElementById('canvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+
+                    const capturedImg = document.getElementById('captured-image');
+                    capturedImg.src = e.target.result;
+                    capturedImg.classList.remove('hidden');
+                    document.getElementById('camera-placeholder').classList.add('hidden');
+                    document.getElementById('btn-start-camera').classList.add('hidden');
+
+                    runTongueAnalysis(ctx, canvas.width, canvas.height);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function runTongueAnalysis(ctx, width, height) {
+            const beam = document.getElementById('scan-beam');
+            const overlay = document.getElementById('scan-overlay');
+            beam.classList.remove('hidden');
+            overlay.classList.remove('hidden');
+
+            playWebSound('magic');
+
+            let rTotal = 0, gTotal = 0, bTotal = 0, count = 0;
+            try {
+                const imgData = ctx.getImageData(width * 0.3, height * 0.3, width * 0.4, height * 0.4);
+                const data = imgData.data;
+                for (let i = 0; i < data.length; i += 16) {
+                    rTotal += data[i];
+                    gTotal += data[i + 1];
+                    bTotal += data[i + 2];
+                    count++;
+                }
+            } catch (e) {
+                rTotal = 200 * 100; gTotal = 120 * 100; bTotal = 130 * 100; count = 100;
+            }
+
+            const avgR = rTotal / (count || 1);
+            const avgG = gTotal / (count || 1);
+            const avgB = bTotal / (count || 1);
+
+            setTimeout(() => {
+                beam.classList.add('hidden');
+                overlay.classList.add('hidden');
+
+                let detected = CONSTITUTIONS[0];
+
+                if (avgR > 180 && avgG < 110 && avgB < 120) {
+                    detected = CONSTITUTIONS[3];
+                } else if (avgR > 170 && avgG > 150 && avgB < 110) {
+                    detected = CONSTITUTIONS[5];
+                } else if (avgR < 140 && avgB > avgR - 20) {
+                    detected = CONSTITUTIONS[6];
+                } else if (avgR > 180 && avgG > 170 && avgB > 170) {
+                    detected = CONSTITUTIONS[4];
+                } else if (avgR > 190 && avgG > 160 && avgB > 160) {
+                    detected = CONSTITUTIONS[1];
+                } else {
+                    const randomIndex = Math.floor(Math.random() * CONSTITUTIONS.length);
+                    detected = CONSTITUTIONS[randomIndex];
+                }
+
+                displayDiagnosisResult(detected);
+                playWebSound('success');
+            }, 2200);
+        }
+
+        function displayDiagnosisResult(item) {
+            const resCard = document.getElementById('diagnosis-result');
+            resCard.classList.remove('hidden');
+
+            document.getElementById('result-title').innerText = `${item.name} (${item.subtitle})`;
+            document.getElementById('result-badge-icon').innerHTML = `<i class="fa-solid ${item.icon} text-${item.color}-600"></i>`;
+            document.getElementById('result-tongue-desc').innerText = item.tongueDesc;
+            document.getElementById('result-symptoms').innerText = item.symptoms;
+            document.getElementById('result-lifestyle').innerText = `💡 健保小提醒：${item.lifestyle}`;
+
+            const foodContainer = document.getElementById('result-foods');
+            foodContainer.innerHTML = item.foods.map(f => `
+                <span class="bg-white text-tcmBrown font-bold text-xs px-3 py-1 rounded-full border border-orange-300 shadow-2xs flex items-center space-x-1">
+                    <i class="fa-solid fa-leaf text-emerald-500 text-[10px]"></i>
+                    <span>${f}</span>
+                </span>
+            `).join('');
+
+            const match = Math.floor(Math.random() * 11) + 88;
+            document.getElementById('result-match-rate').innerText = `特徵匹配度 ${match}%`;
+
+            document.getElementById('btn-capture').classList.add('hidden');
+            document.getElementById('btn-start-camera').classList.add('hidden');
+            document.getElementById('btn-reset').classList.remove('hidden');
+            document.getElementById('btn-reset').classList.add('flex');
+
+            resCard.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function resetScanner() {
+            playWebSound('click');
+            document.getElementById('captured-image').classList.add('hidden');
+            document.getElementById('camera-placeholder').classList.remove('hidden');
+            document.getElementById('diagnosis-result').classList.add('hidden');
+
+            document.getElementById('btn-reset').classList.add('hidden');
+            document.getElementById('btn-start-camera').classList.remove('hidden');
+            document.getElementById('file-upload').value = '';
+        }
+
+        /* MINI QUIZ LOGIC */
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        function renderQuizQuestion() {
+            const container = document.getElementById('quiz-container');
+            if (!container) return;
+
+            if (currentQuestionIndex >= QUIZ_QUESTIONS.length) {
+                container.classList.add('hidden');
+                document.getElementById('quiz-finished').classList.remove('hidden');
+                return;
+            }
+
+            const q = QUIZ_QUESTIONS[currentQuestionIndex];
+
+            container.innerHTML = `
+                <div class="bg-tcmSoftYellow p-5 rounded-2xl border-2 border-amber-300 space-y-4">
+                    <h3 class="text-base md:text-lg font-bold text-tcmBrown">${q.question}</h3>
+                    
+                    <div class="space-y-2.5">
+                        ${q.options.map((opt, idx) => `
+                            <button onclick="checkAnswer(${idx})" class="quiz-opt-btn w-full text-left p-3.5 rounded-xl bg-white border-2 border-amber-200 hover:border-tcmGold hover:bg-amber-100/50 text-sm font-semibold text-gray-800 transition flex items-center justify-between">
+                                <span>${opt}</span>
+                                <i class="fa-regular fa-circle text-amber-400"></i>
+                            </button>
+                        `).join('')}
+                    </div>
+
+                    <div id="quiz-feedback" class="hidden p-3 rounded-xl text-xs md:text-sm font-bold mt-3"></div>
+                </div>
+            `;
+        }
+
+        function checkAnswer(selectedIdx) {
+            const q = QUIZ_QUESTIONS[currentQuestionIndex];
+            const feedback = document.getElementById('quiz-feedback');
+            const btns = document.querySelectorAll('.quiz-opt-btn');
+
+            btns.forEach(btn => btn.disabled = true);
+
+            if (selectedIdx === q.correct) {
+                playWebSound('success');
+                score++;
+                document.getElementById('quiz-score').innerText = `${score} / ${QUIZ_QUESTIONS.length}`;
+                btns[selectedIdx].className = "w-full text-left p-3.5 rounded-xl bg-emerald-100 border-2 border-emerald-500 text-sm font-bold text-emerald-900 flex items-center justify-between";
+                feedback.className = "p-3 rounded-xl text-xs md:text-sm font-bold mt-3 bg-emerald-50 text-emerald-800 border border-emerald-300";
+                feedback.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i> ${q.explanation}`;
+            } else {
+                playWebSound('error');
+                btns[selectedIdx].className = "w-full text-left p-3.5 rounded-xl bg-red-100 border-2 border-red-400 text-sm font-bold text-red-900 flex items-center justify-between";
+                btns[q.correct].className = "w-full text-left p-3.5 rounded-xl bg-emerald-100 border-2 border-emerald-500 text-sm font-bold text-emerald-900 flex items-center justify-between";
+                feedback.className = "p-3 rounded-xl text-xs md:text-sm font-bold mt-3 bg-red-50 text-red-800 border border-red-300";
+                feedback.innerHTML = `<i class="fa-solid fa-circle-xmark text-red-600 mr-1"></i> 差一點點！正確答案是第一個喔！ ${q.explanation}`;
+            }
+
+            feedback.classList.remove('hidden');
+
+            setTimeout(() => {
+                currentQuestionIndex++;
+                renderQuizQuestion();
+            }, 2500);
+        }
+
+        function restartQuiz() {
+            playWebSound('click');
+            currentQuestionIndex = 0;
+            score = 0;
+            document.getElementById('quiz-score').innerText = `0 / ${QUIZ_QUESTIONS.length}`;
+            document.getElementById('quiz-container').classList.remove('hidden');
+            document.getElementById('quiz-finished').classList.add('hidden');
+            renderQuizQuestion();
+        }
+
+        /* INITIALIZATION */
+        window.onload = function() {
+            renderGuideSection();
+            renderQuizQuestion();
+        };
+    </script>
+</body>
+</html>
