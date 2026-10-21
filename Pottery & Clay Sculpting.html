@@ -1,0 +1,1551 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>泥人張／陶瓷小工匠：3D 陶藝與捏塑 (Pottery & Clay Sculpting)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts for Asian Typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;900&family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        pottery: {
+                            clay: '#D97706',
+                            terracotta: '#E11D48',
+                            kaolin: '#FEF08A',
+                            cobalt: '#2563EB',
+                            celadon: '#10B981',
+                            famille: '#EC4899',
+                            kilnRed: '#DC2626',
+                            wood: '#B45309',
+                            gold: '#F59E0B',
+                            bgGradStart: '#EFF6FF',
+                            bgGradEnd: '#FDF4FF'
+                        }
+                    },
+                    fontFamily: {
+                        serifTC: ['"Noto Serif TC"', 'serif'],
+                        friendly: ['"Fredoka"', 'cursive', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            font-family: 'Fredoka', 'Noto Serif TC', sans-serif;
+            overflow: hidden;
+            background: linear-gradient(135deg, #E0F2FE 0%, #FAF5FF 50%, #FEF3C7 100%);
+        }
+
+        /* Bright Colorful Glassmorphism UI */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(16px);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 12px 30px -5px rgba(37, 99, 235, 0.15), 0 8px 15px -6px rgba(245, 158, 11, 0.1);
+        }
+
+        /* Single line header text clip fix */
+        .header-container {
+            height: 64px;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #F59E0B;
+            border-radius: 9999px;
+        }
+
+        /* Flame animation for Kiln */
+        @keyframes pulseFlame {
+            0%, 100% { transform: scale(1); opacity: 0.85; }
+            50% { transform: scale(1.08); opacity: 1; }
+        }
+        .animate-flame {
+            animation: pulseFlame 1.2s ease-in-out infinite;
+        }
+
+        /* Stamp watermark effect */
+        .seal-stamp {
+            border: 3.5px solid #DC2626;
+            color: #DC2626;
+            font-family: 'Noto Serif TC', serif;
+            font-weight: 900;
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+            border-radius: 8px;
+            box-shadow: inset 0 0 6px rgba(220, 38, 38, 0.3), 0 4px 10px rgba(0,0,0,0.1);
+            background-color: rgba(254, 226, 226, 0.85);
+        }
+
+        /* Canvas overlays */
+        #interactive-overlay {
+            pointer-events: none;
+        }
+        .sculpt-handle {
+            pointer-events: auto;
+            touch-action: none;
+        }
+
+        /* Playful button pop */
+        .btn-pop {
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .btn-pop:hover {
+            transform: translateY(-2px) scale(1.03);
+        }
+        .btn-pop:active {
+            transform: translateY(1px) scale(0.97);
+        }
+    </style>
+</head>
+<body class="w-screen h-screen relative flex flex-col justify-between overflow-hidden text-gray-800 select-none">
+
+    <!-- WELCOME / DESIGNER NAME SETUP MODAL -->
+    <div id="welcome-modal" class="fixed inset-0 z-50 bg-sky-900/60 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-gradient-to-br from-amber-50 via-white to-sky-50 border-4 border-amber-400 max-w-md w-full rounded-3xl p-6 md:p-8 shadow-2xl text-center relative transform transition-all scale-100">
+            <div class="w-20 h-20 bg-gradient-to-tr from-amber-400 to-rose-400 text-white rounded-3xl mx-auto flex items-center justify-center text-4xl shadow-lg -mt-12 border-4 border-white transform -rotate-6">
+                <i class="fa-solid fa-palette"></i>
+            </div>
+            
+            <h2 class="text-2xl md:text-3xl font-black font-serifTC text-gray-900 mt-4 mb-2 tracking-wide">
+                🎨 歡迎來到陶瓷小工匠！
+            </h2>
+            <p class="text-xs md:text-sm text-gray-600 mb-6 font-medium">
+                歡迎體驗景德鎮手工製瓷與泥人張彩塑非遺文化。請先設定你的小工匠／設計師名字：
+            </p>
+
+            <div class="mb-6">
+                <label class="block text-xs font-bold text-amber-800 uppercase tracking-wider mb-2" id="txt-welcome-name-label">設計師/小工匠姓名</label>
+                <div class="relative">
+                    <input type="text" id="input-designer-name" maxlength="6" value="陳小明" placeholder="請輸入名字" class="w-full px-4 py-3 bg-white border-2 border-amber-300 rounded-2xl text-lg font-bold text-center text-amber-900 focus:outline-none focus:border-rose-500 shadow-inner">
+                    <div class="absolute right-3 top-3 text-amber-500">
+                        <i class="fa-solid fa-pen-nib"></i>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="confirmDesignerName()" class="btn-pop w-full py-3.5 bg-gradient-to-r from-rose-500 via-amber-500 to-emerald-500 text-white font-black text-lg rounded-2xl shadow-xl flex items-center justify-center gap-2">
+                <span>開始創作 Pottery Journey</span>
+                <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- JINGDEZHEN CULTURE EDUCATION MODAL -->
+    <div id="jingdezhen-modal" class="hidden fixed inset-0 z-50 bg-sky-950/70 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-gradient-to-b from-amber-50 to-orange-50 border-4 border-amber-400 max-w-2xl w-full rounded-3xl p-6 md:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeJingdezhenModal()" class="absolute top-4 right-4 w-10 h-10 bg-rose-500 text-white rounded-full font-bold flex items-center justify-center hover:bg-rose-600 shadow-md">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+
+            <div class="flex items-center space-x-3 mb-4">
+                <div class="w-12 h-12 bg-amber-500 text-white rounded-2xl flex items-center justify-center text-2xl shadow-md">
+                    <i class="fa-solid fa-landmark-dome"></i>
+                </div>
+                <div>
+                    <span class="text-xs font-bold text-rose-600 tracking-widest uppercase" id="txt-j-badge">非物質文化遺產科普</span>
+                    <h2 class="text-xl md:text-2xl font-black font-serifTC text-gray-900" id="txt-j-title">什麼是「景德鎮手工製瓷」？</h2>
+                </div>
+            </div>
+
+            <div class="space-y-4 text-xs md:text-sm text-gray-700 leading-relaxed">
+                <div class="p-4 bg-white/90 rounded-2xl border-2 border-amber-200 shadow-sm flex items-start space-x-3">
+                    <span class="text-3xl">🏺</span>
+                    <div>
+                        <h4 class="font-bold text-amber-900 text-sm mb-1" id="txt-j-sec1-t">世界著名的「瓷都」</h4>
+                        <p id="txt-j-sec1-b">景德鎮位於江西省，擁有超過千年的製瓷歷史！這裡製作的瓷器白如玉、明如鏡、薄如紙、聲如磬，被譽為中華文化的國寶。</p>
+                    </div>
+                </div>
+
+                <div class="p-4 bg-white/90 rounded-2xl border-2 border-amber-200 shadow-sm flex items-start space-x-3">
+                    <span class="text-3xl">⚒️</span>
+                    <div>
+                        <h4 class="font-bold text-amber-900 text-sm mb-1" id="txt-j-sec2-t">神奇的高嶺土與72道工序</h4>
+                        <p id="txt-j-sec2-b">製作一件優雅的瓷器，要經過「採石、淘泥、拉坯、印坯、揉泥、畫彩、上釉、入窯柴燒」等共 72 道繁複的手工工序，凝結了歷代工匠的無比智慧！</p>
+                    </div>
+                </div>
+
+                <div class="p-4 bg-white/90 rounded-2xl border-2 border-amber-200 shadow-sm flex items-start space-x-3">
+                    <span class="text-3xl">🔥</span>
+                    <div>
+                        <h4 class="font-bold text-amber-900 text-sm mb-1" id="txt-j-sec3-t">1300°C 柴窯的「窯變驚喜」</h4>
+                        <p id="txt-j-sec3-b">在傳統柴窯中，高溫能達到 1300°C 以上！釉藥在高溫熔融流動，冷卻時會產生神秘的色彩變化（窯變）與晶瑩剔透的冰裂紋（開片）。</p>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="closeJingdezhenModal()" class="btn-pop w-full mt-6 py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-2xl shadow-lg flex items-center justify-center gap-2">
+                <span id="txt-j-close">學到了！開始動手捏塑</span>
+                <i class="fa-solid fa-check"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- TOP NAVIGATION BAR (SINGLE LINE SIZE STRICT) -->
+    <header class="relative z-30 w-full px-3 md:px-6 header-container flex justify-between items-center glass-panel rounded-b-2xl shadow-sm border-b-2 border-amber-300/50">
+        <!-- Logo & Title -->
+        <div class="flex items-center space-x-2 md:space-x-3 shrink-0">
+            <div class="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-tr from-rose-500 to-amber-500 text-white rounded-xl flex items-center justify-center text-lg md:text-xl shadow-md">
+                <i class="fa-solid fa-fire-burner"></i>
+            </div>
+            <div class="flex items-center space-x-2">
+                <h1 class="font-serifTC font-black text-sm md:text-lg text-gray-900 tracking-tight whitespace-nowrap" id="txt-app-title">
+                    泥人張／陶瓷小工匠
+                </h1>
+                <button onclick="openJingdezhenModal()" class="btn-pop px-2.5 py-1 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-white rounded-full text-[11px] md:text-xs font-bold shadow flex items-center gap-1 whitespace-nowrap">
+                    <i class="fa-solid fa-book-open"></i>
+                    <span id="txt-btn-j-knowledge">景德鎮小知識</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Stage Navigation Stepper (Single Horizontal Line Strict) -->
+        <nav class="flex items-center space-x-1 sm:space-x-2 bg-amber-100/70 p-1 rounded-xl border border-amber-300 shrink-0">
+            <button id="step-btn-1" onclick="switchStage(1)" class="stage-nav-btn btn-pop px-2.5 py-1 md:px-3 md:py-1.5 rounded-lg text-xs md:text-xs font-bold flex items-center space-x-1 transition-all bg-rose-500 text-white shadow-sm whitespace-nowrap">
+                <i class="fa-solid fa-hands text-[11px]"></i>
+                <span id="txt-step-1">1. 塑形</span>
+            </button>
+            <i class="fa-solid fa-chevron-right text-[10px] text-amber-500"></i>
+            <button id="step-btn-2" onclick="switchStage(2)" class="stage-nav-btn btn-pop px-2.5 py-1 md:px-3 md:py-1.5 rounded-lg text-xs md:text-xs font-bold flex items-center space-x-1 transition-all text-amber-900 hover:bg-amber-200/80 whitespace-nowrap">
+                <i class="fa-solid fa-paint-brush text-[11px]"></i>
+                <span id="txt-step-2">2. 上釉彩繪</span>
+            </button>
+            <i class="fa-solid fa-chevron-right text-[10px] text-amber-500"></i>
+            <button id="step-btn-3" onclick="switchStage(3)" class="stage-nav-btn btn-pop px-2.5 py-1 md:px-3 md:py-1.5 rounded-lg text-xs md:text-xs font-bold flex items-center space-x-1 transition-all text-amber-900 hover:bg-amber-200/80 whitespace-nowrap">
+                <i class="fa-solid fa-volcano text-[11px]"></i>
+                <span id="txt-step-3">3. 柴燒出窯</span>
+            </button>
+            <i class="fa-solid fa-chevron-right text-[10px] text-amber-500"></i>
+            <button id="step-btn-4" onclick="switchStage(4)" class="stage-nav-btn btn-pop px-2.5 py-1 md:px-3 md:py-1.5 rounded-lg text-xs md:text-xs font-bold flex items-center space-x-1 transition-all text-amber-900 hover:bg-amber-200/80 whitespace-nowrap">
+                <i class="fa-solid fa-gem text-[11px]"></i>
+                <span id="txt-step-4">4. 展覽館</span>
+            </button>
+        </nav>
+
+        <!-- Right System Controls -->
+        <div class="flex items-center space-x-1.5 md:space-x-2 shrink-0">
+            <!-- Language Toggle -->
+            <button id="lang-btn" onclick="toggleLanguage()" class="btn-pop px-2.5 py-1 bg-white border-2 border-sky-300 rounded-xl text-xs font-bold hover:bg-sky-50 flex items-center space-x-1 shadow-sm text-sky-800">
+                <i class="fa-solid fa-globe"></i>
+                <span id="lang-text">EN</span>
+            </button>
+            <!-- Audio Toggle -->
+            <button id="audio-btn" onclick="toggleAudio()" class="btn-pop w-8 h-8 md:w-9 md:h-9 bg-white border-2 border-emerald-300 rounded-xl text-xs md:text-sm font-bold flex items-center justify-center shadow-sm text-emerald-600">
+                <i id="audio-icon" class="fa-solid fa-volume-high"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN 3D VIEWPORT CONTAINER -->
+    <main class="relative flex-1 w-full h-full overflow-hidden">
+        <!-- Three.js Canvas Container -->
+        <div id="canvas-3d-container" class="absolute inset-0 w-full h-full cursor-grab active:cursor-grabbing"></div>
+
+        <!-- STAGE 1 OVERLAY: PROFILE EDIT HANDLES -->
+        <div id="interactive-overlay" class="absolute inset-0 w-full h-full z-10 transition-opacity duration-300">
+            <svg id="profile-svg" class="w-full h-full absolute inset-0">
+                <!-- Dynamic profile line drawn by JS -->
+                <path id="profile-path" d="" fill="none" stroke="#F59E0B" stroke-width="4" stroke-dasharray="6 4" />
+                <path id="profile-path-sym" d="" fill="none" stroke="#F59E0B" stroke-opacity="0.4" stroke-width="3" stroke-dasharray="4 4" />
+            </svg>
+            <!-- DOM handles inserted dynamically -->
+            <div id="sculpt-handles-container" class="absolute inset-0"></div>
+        </div>
+
+        <!-- FLOATING CONTROL PANELS ACCORDING TO CURRENT STAGE -->
+
+        <!-- STAGE 1 TOOLBAR: Clay Shaping Controls -->
+        <div id="panel-stage-1" class="stage-panel absolute left-4 bottom-6 z-20 w-80 md:w-96 glass-panel rounded-3xl p-4 md:p-5 shadow-2xl transition-all duration-300 border-2 border-amber-200">
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="font-bold text-amber-900 text-sm md:text-base flex items-center gap-2">
+                    <i class="fa-solid fa-shapes text-rose-500"></i>
+                    <span id="txt-s1-title">陶土塑形工具箱</span>
+                </h2>
+                <button onclick="resetClayShape()" class="btn-pop text-xs px-2.5 py-1 bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-xl font-bold flex items-center gap-1 border border-amber-300">
+                    <i class="fa-solid fa-rotate-left"></i> <span id="txt-reset">重置</span>
+                </button>
+            </div>
+
+            <!-- Base Shape Presets -->
+            <div class="mb-4">
+                <label class="text-xs font-bold text-amber-800 uppercase tracking-wider block mb-2" id="txt-preset-label">選擇經典胎型</label>
+                <div class="grid grid-cols-4 gap-2">
+                    <button onclick="applyPreset('vase')" class="preset-btn btn-pop p-2 bg-gradient-to-b from-amber-50 to-white rounded-2xl border-2 border-rose-400 hover:border-rose-500 flex flex-col items-center justify-center transition shadow-sm">
+                        <i class="fa-solid fa-wine-bottle text-rose-500 text-lg mb-1"></i>
+                        <span class="text-[10px] font-bold text-amber-900" id="txt-p-vase">花瓶</span>
+                    </button>
+                    <button onclick="applyPreset('teapot')" class="preset-btn btn-pop p-2 bg-gradient-to-b from-amber-50 to-white rounded-2xl border-2 border-transparent hover:border-rose-400 flex flex-col items-center justify-center transition shadow-sm">
+                        <i class="fa-solid fa-mug-hot text-amber-600 text-lg mb-1"></i>
+                        <span class="text-[10px] font-bold text-amber-900" id="txt-p-teapot">茶壺</span>
+                    </button>
+                    <button onclick="applyPreset('bowl')" class="preset-btn btn-pop p-2 bg-gradient-to-b from-amber-50 to-white rounded-2xl border-2 border-transparent hover:border-rose-400 flex flex-col items-center justify-center transition shadow-sm">
+                        <i class="fa-solid fa-bowl-food text-emerald-600 text-lg mb-1"></i>
+                        <span class="text-[10px] font-bold text-amber-900" id="txt-p-bowl">茶碗</span>
+                    </button>
+                    <button onclick="applyPreset('figurine')" class="preset-btn btn-pop p-2 bg-gradient-to-b from-amber-50 to-white rounded-2xl border-2 border-transparent hover:border-rose-400 flex flex-col items-center justify-center transition shadow-sm">
+                        <i class="fa-solid fa-cat text-sky-600 text-lg mb-1"></i>
+                        <span class="text-[10px] font-bold text-amber-900" id="txt-p-figurine">泥人</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Clay Type / Color Selection -->
+            <div class="mb-4">
+                <label class="text-xs font-bold text-amber-800 uppercase tracking-wider block mb-2" id="txt-claytype-label">選擇泥料種類</label>
+                <div class="flex space-x-2">
+                    <button onclick="setClayMaterial('raw')" class="clay-mat-btn btn-pop flex-1 py-1.5 px-2 bg-amber-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1 shadow-sm border-2 border-amber-300">
+                        <span class="w-3 h-3 rounded-full bg-[#D97706] border border-white"></span>
+                        <span id="txt-clay-raw">紫砂/陶泥</span>
+                    </button>
+                    <button onclick="setClayMaterial('terracotta')" class="clay-mat-btn btn-pop flex-1 py-1.5 px-2 bg-white text-amber-900 rounded-xl text-xs font-bold flex items-center justify-center gap-1 shadow-sm border-2 border-transparent">
+                        <span class="w-3 h-3 rounded-full bg-[#E11D48] border border-white"></span>
+                        <span id="txt-clay-terra">紅陶泥</span>
+                    </button>
+                    <button onclick="setClayMaterial('kaolin')" class="clay-mat-btn btn-pop flex-1 py-1.5 px-2 bg-white text-amber-900 rounded-xl text-xs font-bold flex items-center justify-center gap-1 shadow-sm border-2 border-transparent">
+                        <span class="w-3 h-3 rounded-full bg-[#FEF08A] border border-gray-300"></span>
+                        <span id="txt-clay-kaolin">高嶺白泥</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Wheel Speed & Smooth Slider -->
+            <div class="space-y-3">
+                <div>
+                    <div class="flex justify-between text-xs font-bold text-amber-900 mb-1">
+                        <span id="txt-wheelspeed">轆轤轉速 (Potter's Wheel)</span>
+                        <span id="speed-val">50%</span>
+                    </div>
+                    <input type="range" id="wheel-speed" min="0" max="100" value="50" oninput="updateWheelSpeed(this.value)" class="w-full accent-rose-500 cursor-pointer">
+                </div>
+            </div>
+
+            <button onclick="switchStage(2)" class="btn-pop w-full mt-4 py-3 bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 text-white rounded-2xl font-black shadow-lg flex items-center justify-center gap-2 text-sm transition">
+                <span id="txt-goto-paint">完成塑形，進入彩繪</span>
+                <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+
+        <!-- STAGE 2 TOOLBAR & DUAL-VIEW PAINTING INTERFACE -->
+        <div id="panel-stage-2" class="stage-panel hidden absolute left-4 top-20 bottom-6 z-20 w-80 md:w-96 glass-panel rounded-3xl p-4 md:p-5 shadow-2xl flex flex-col justify-between transition-all duration-300 border-2 border-sky-200 overflow-y-auto">
+            <div>
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="font-bold text-sky-900 text-sm md:text-base flex items-center gap-2">
+                        <i class="fa-solid fa-palette text-sky-600"></i>
+                        <span id="txt-s2-title">傳統釉彩與畫筆</span>
+                    </h2>
+                    <button onclick="clearPaintCanvas()" class="btn-pop text-xs px-2.5 py-1 bg-rose-100 hover:bg-rose-200 text-rose-700 rounded-xl font-bold flex items-center gap-1 border border-rose-300">
+                        <i class="fa-solid fa-trash-can"></i> <span id="txt-clear">清除</span>
+                    </button>
+                </div>
+
+                <!-- Glaze Style Preset -->
+                <div class="mb-4">
+                    <label class="text-xs font-bold text-sky-800 uppercase tracking-wider block mb-2" id="txt-glaze-style">選擇彩繪釉系 (Traditional Style)</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="setPalette('blue_white')" class="palette-btn btn-pop p-2 bg-sky-50 border-2 border-sky-500 rounded-2xl text-center">
+                            <span class="block text-xs font-bold text-sky-900" id="txt-pal-cobalt">青花瓷</span>
+                            <span class="text-[9px] font-semibold text-sky-600">Cobalt Blue</span>
+                        </button>
+                        <button onclick="setPalette('famille_rose')" class="palette-btn btn-pop p-2 bg-pink-50 border-2 border-transparent rounded-2xl text-center">
+                            <span class="block text-xs font-bold text-pink-900" id="txt-pal-famille">粉彩</span>
+                            <span class="text-[9px] font-semibold text-pink-600">Famille Rose</span>
+                        </button>
+                        <button onclick="setPalette('sancai')" class="palette-btn btn-pop p-2 bg-amber-50 border-2 border-transparent rounded-2xl text-center">
+                            <span class="block text-xs font-bold text-amber-900" id="txt-pal-sancai">唐三彩</span>
+                            <span class="text-[9px] font-semibold text-amber-700">Tang Sancai</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Active Colors -->
+                <div class="mb-4">
+                    <label class="text-xs font-bold text-sky-800 uppercase tracking-wider block mb-2" id="txt-color-pick">國畫顏料選擇</label>
+                    <div id="color-palette-container" class="flex items-center space-x-2">
+                        <!-- Filled dynamically -->
+                    </div>
+                </div>
+
+                <!-- Base Glaze Finish -->
+                <div class="mb-4">
+                    <label class="text-xs font-bold text-sky-800 uppercase tracking-wider block mb-2" id="txt-base-glaze">底釉質感 (Base Glaze)</label>
+                    <div class="grid grid-cols-3 gap-1.5 text-center text-xs">
+                        <button onclick="setBaseGlaze('celadon')" class="base-glaze-btn btn-pop py-1.5 bg-emerald-100 text-emerald-900 rounded-xl font-bold border border-emerald-300" id="txt-g-celadon">龍泉青瓷</button>
+                        <button onclick="setBaseGlaze('white')" class="base-glaze-btn btn-pop py-1.5 bg-sky-50 text-sky-900 rounded-xl font-bold border border-sky-200" id="txt-g-white">德化白瓷</button>
+                        <button onclick="setBaseGlaze('black')" class="base-glaze-btn btn-pop py-1.5 bg-gray-800 text-amber-100 rounded-xl font-bold border border-gray-900" id="txt-g-black">建盞黑釉</button>
+                    </div>
+                </div>
+
+                <!-- Stamp / Motif Tools (FIXED VECTOR DRAGON & MOTIFS) -->
+                <div class="mb-4">
+                    <label class="text-xs font-bold text-sky-800 uppercase tracking-wider block mb-2" id="txt-motifs">吉祥紋樣印章 (Traditional Motifs)</label>
+                    <div class="grid grid-cols-5 gap-1.5">
+                        <button onclick="selectMotif('dragon')" class="motif-btn btn-pop p-2 bg-amber-50 hover:bg-amber-100 rounded-2xl border-2 border-amber-300 flex flex-col items-center justify-center text-amber-900 text-xs font-bold shadow-sm" title="祥龍 Dragon">
+                            <span class="text-lg mb-0.5">🐉</span>
+                            <span class="text-[9px]">祥龍</span>
+                        </button>
+                        <button onclick="selectMotif('cloud')" class="motif-btn btn-pop p-2 bg-white hover:bg-sky-50 rounded-2xl border-2 border-sky-200 flex flex-col items-center justify-center text-sky-800 text-xs font-bold shadow-sm" title="祥雲 Cloud">
+                            <span class="text-lg mb-0.5">☁️</span>
+                            <span class="text-[9px]">祥雲</span>
+                        </button>
+                        <button onclick="selectMotif('lotus')" class="motif-btn btn-pop p-2 bg-white hover:bg-pink-50 rounded-2xl border-2 border-pink-200 flex flex-col items-center justify-center text-pink-800 text-xs font-bold shadow-sm" title="蓮花 Lotus">
+                            <span class="text-lg mb-0.5">🪷</span>
+                            <span class="text-[9px]">蓮花</span>
+                        </button>
+                        <button onclick="selectMotif('fish')" class="motif-btn btn-pop p-2 bg-white hover:bg-emerald-50 rounded-2xl border-2 border-emerald-200 flex flex-col items-center justify-center text-emerald-800 text-xs font-bold shadow-sm" title="雙魚 Fish">
+                            <span class="text-lg mb-0.5">🐟</span>
+                            <span class="text-[9px]">雙魚</span>
+                        </button>
+                        <button onclick="selectMotif('flower')" class="motif-btn btn-pop p-2 bg-white hover:bg-rose-50 rounded-2xl border-2 border-rose-200 flex flex-col items-center justify-center text-rose-800 text-xs font-bold shadow-sm" title="梅花 Flower">
+                            <span class="text-lg mb-0.5">🌸</span>
+                            <span class="text-[9px]">梅花</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Brush Sliders -->
+                <div class="space-y-2">
+                    <div>
+                        <div class="flex justify-between text-xs font-bold text-sky-900 mb-1">
+                            <span id="txt-brush-size">毛筆大小 (Brush Size)</span>
+                            <span id="brush-size-val">12px</span>
+                        </div>
+                        <input type="range" id="brush-size" min="2" max="50" value="12" oninput="updateBrushSize(this.value)" class="w-full accent-sky-600">
+                    </div>
+                </div>
+            </div>
+
+            <!-- UNROLLED 2D CANVAS PREVIEW -->
+            <div class="mt-3 pt-3 border-t border-sky-200">
+                <label class="text-[11px] font-bold text-sky-800 block mb-1 flex justify-between">
+                    <span id="txt-unrolled-view">2D 展開繪畫圖層</span>
+                    <span class="text-sky-600"><i class="fa-solid fa-hand-pointer"></i> <span id="txt-paint-hint">點擊印章或直接繪畫</span></span>
+                </label>
+                <div class="relative w-full h-32 bg-amber-50 rounded-2xl overflow-hidden border-2 border-amber-300 shadow-inner">
+                    <canvas id="texture-canvas" width="512" height="256" class="w-full h-full cursor-crosshair"></canvas>
+                </div>
+            </div>
+
+            <button onclick="switchStage(3)" class="btn-pop w-full mt-3 py-2.5 bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-600 hover:to-indigo-700 text-white rounded-2xl font-bold shadow-lg flex items-center justify-center gap-2 text-sm transition">
+                <span id="txt-goto-kiln">繪製完成，進入柴窯入窯</span>
+                <i class="fa-solid fa-fire"></i>
+            </button>
+        </div>
+
+        <!-- STAGE 3 OVERLAY: KILN FIRING MODAL & VFX -->
+        <div id="kiln-overlay" class="hidden absolute inset-0 z-40 bg-sky-950/80 backdrop-blur-md flex flex-col items-center justify-center p-6 text-white text-center">
+            <!-- Brick Kiln Graphics -->
+            <div id="kiln-graphic" class="relative w-72 h-72 md:w-96 md:h-96 rounded-3xl border-8 border-amber-800/80 bg-gradient-to-b from-gray-950 via-rose-950 to-amber-950 overflow-hidden flex flex-col items-center justify-center shadow-2xl">
+                <!-- Fire particle canvas -->
+                <canvas id="fire-canvas" class="absolute inset-0 w-full h-full pointer-events-none"></canvas>
+                
+                <!-- Temperature & Countdown HUD -->
+                <div class="relative z-10 space-y-2">
+                    <div class="inline-block px-4 py-1 bg-rose-600 rounded-full text-xs font-black tracking-wider uppercase animate-pulse border border-rose-300">
+                        <i class="fa-solid fa-fire"></i> <span id="txt-firing-status">景德鎮傳統柴窯進火中...</span>
+                    </div>
+                    <div class="text-5xl md:text-6xl font-black font-serifTC tracking-wider text-amber-300 drop-shadow-lg">
+                        <span id="kiln-temp">25</span>°C
+                    </div>
+                    <p class="text-xs text-amber-200/90 font-bold" id="txt-kiln-desc">高溫燒製 1300°C 結晶開片中</p>
+                </div>
+
+                <!-- Timer Ring -->
+                <div class="absolute bottom-6 left-0 right-0 flex justify-center">
+                    <div class="w-12 h-12 rounded-full border-4 border-amber-400 border-t-transparent animate-spin flex items-center justify-center text-xs font-bold" id="kiln-timer">
+                        3s
+                    </div>
+                </div>
+            </div>
+
+            <!-- Start Firing Trigger Button -->
+            <button id="start-fire-btn" onclick="runKilnFiringSequence()" class="btn-pop mt-8 px-8 py-4 bg-gradient-to-r from-rose-500 via-amber-500 to-rose-600 text-white font-black text-lg md:text-xl rounded-full shadow-2xl flex items-center gap-3">
+                <i class="fa-solid fa-fire-flame-curved text-yellow-300 text-2xl"></i>
+                <span id="txt-btn-fire">點火開窯 (Start Firing)</span>
+            </button>
+        </div>
+
+        <!-- STAGE 3 CULTURAL KNOWLEDGE POPUP MODAL -->
+        <div id="fact-modal" class="hidden absolute inset-0 z-50 bg-sky-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <div class="bg-amber-50 border-4 border-amber-400 max-w-lg w-full rounded-3xl p-6 shadow-2xl text-gray-800 relative transform transition-all scale-95 opacity-0" id="fact-card">
+                <div class="w-16 h-16 bg-gradient-to-tr from-amber-400 to-rose-400 border-4 border-white rounded-2xl flex items-center justify-center text-3xl text-white absolute -top-8 left-1/2 transform -translate-x-1/2 shadow-lg">
+                    <i class="fa-solid fa-scroll"></i>
+                </div>
+
+                <div class="mt-4 text-center">
+                    <span class="text-xs font-bold text-rose-600 tracking-widest uppercase" id="txt-fact-badge">非遺文化知識小堂</span>
+                    <h3 class="text-xl font-black font-serifTC text-gray-900 mt-1 mb-3" id="fact-title">景德鎮手工製瓷與窯變</h3>
+                    <p class="text-xs md:text-sm text-gray-700 leading-relaxed text-justify mb-4" id="fact-body">
+                        景德鎮被譽為世界「瓷都」。入窯柴燒時，高溫超過 1300°C，陶瓷表面的釉藥在高溫下自然流動融化，產生獨一無二的「窯變」與自然的「開片（冰裂紋）」現象！這也是非物質文化遺產中最令人驚嘆的開窯驚喜。
+                    </p>
+                    <div class="p-3 bg-amber-100 rounded-2xl text-left border border-amber-300 text-xs text-amber-900 flex items-start gap-2 mb-5">
+                        <i class="fa-solid fa-lightbulb text-amber-600 text-base mt-0.5"></i>
+                        <span id="fact-tip">泥人張彩塑是北方泥塑的代表，著重於活靈活現的人物表情捏塑與豐富彩繪！</span>
+                    </div>
+                </div>
+
+                <button onclick="closeFactModalAndShowroom()" class="btn-pop w-full py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-2xl shadow-lg flex items-center justify-center gap-2">
+                    <span id="txt-enter-gallery">前往精品展覽館展示作品</span>
+                    <i class="fa-solid fa-award"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- STAGE 4 TOOLBAR & GALLERY SHOWROOM HUD -->
+        <div id="panel-stage-4" class="stage-panel hidden absolute left-4 bottom-6 z-20 w-80 md:w-96 glass-panel rounded-3xl p-5 shadow-2xl transition-all duration-300 border-2 border-amber-300">
+            <h2 class="font-bold text-gray-800 text-base mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-award text-amber-500 text-2xl"></i>
+                <span id="txt-s4-title">大師作品展覽館</span>
+            </h2>
+
+            <!-- Custom Seal Input -->
+            <div class="mb-4">
+                <label class="text-xs font-bold text-amber-900 block mb-1" id="txt-seal-label">作者專屬落款印章 (Custom Seal)</label>
+                <div class="flex gap-2">
+                    <input type="text" id="seal-name" maxlength="6" value="陳小明" class="flex-1 px-3 py-2 border-2 border-amber-300 rounded-xl text-sm font-serifTC text-center font-bold focus:outline-none focus:ring-2 focus:ring-rose-500 bg-white">
+                    <button onclick="updateSealName()" class="btn-pop px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl shadow-sm" id="txt-seal-btn">落款</button>
+                </div>
+            </div>
+
+            <!-- Auto Rotate Toggle -->
+            <div class="flex items-center justify-between mb-4 bg-amber-100/70 p-2.5 rounded-2xl border border-amber-200">
+                <span class="text-xs font-bold text-amber-900 flex items-center gap-2">
+                    <i class="fa-solid fa-arrows-spin text-rose-500"></i>
+                    <span id="txt-rotate-toggle">展台 360° 自動旋轉</span>
+                </span>
+                <input type="checkbox" id="auto-rotate-cb" checked onchange="toggleAutoRotate(this.checked)" class="w-5 h-5 accent-rose-500 cursor-pointer">
+            </div>
+
+            <!-- Export Buttons -->
+            <div class="space-y-2">
+                <button onclick="downloadSnapshot()" class="btn-pop w-full py-3 bg-gradient-to-r from-amber-500 via-rose-500 to-amber-600 hover:from-amber-600 hover:to-rose-600 text-white font-bold rounded-2xl shadow-lg flex items-center justify-center gap-2 text-sm transition">
+                    <i class="fa-solid fa-camera"></i>
+                    <span id="txt-download-btn">導出高畫質作品海報 (PNG)</span>
+                </button>
+                <button onclick="switchStage(1)" class="btn-pop w-full py-2 bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold rounded-2xl text-xs flex items-center justify-center gap-2 border border-amber-300">
+                    <i class="fa-solid fa-plus"></i>
+                    <span id="txt-restart-btn">捏製一件新陶瓷</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- GALLERY STAMP WATERMARK DISPLAY OVERLAY -->
+        <div id="gallery-watermark" class="hidden absolute top-20 right-8 z-20 flex flex-col items-end pointer-events-none">
+            <div class="seal-stamp w-12 h-28 flex items-center justify-center text-lg tracking-widest p-1 shadow-lg">
+                <span id="seal-text-display">陳小明印</span>
+            </div>
+            <div class="mt-2 text-right">
+                <p class="font-serifTC font-bold text-amber-900 text-sm drop-shadow" id="txt-watermark-title">景德鎮‧典藏瓷器</p>
+                <p class="text-[10px] text-gray-600 font-bold">非物質文化遺產傳承作品</p>
+            </div>
+        </div>
+
+        <!-- AUTHOR CREDIT WATERMARK (BOTTOM LEFT) -->
+        <div class="absolute bottom-3 left-4 z-30 pointer-events-none select-none flex items-center gap-2 bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-amber-300/80 shadow-md">
+            <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse"></span>
+            <span class="font-serifTC font-black text-xs md:text-sm text-amber-950 tracking-wider">
+                黃老師設計
+            </span>
+        </div>
+    </main>
+
+    <!-- JAVASCRIPT LOGIC ENGINE -->
+    <script>
+        /* ===================================================================
+           1. BILINGUAL DICTIONARY & STATE MANAGEMENT
+           =================================================================== */
+        let currentLang = 'zh'; // 'zh' or 'en'
+        let currentStage = 1;   // 1: Sculpt, 2: Paint, 3: Kiln, 4: Gallery
+        let audioEnabled = true;
+        let designerName = "陳小明";
+
+        const i18n = {
+            zh: {
+                appTitle: "泥人張／陶瓷小工匠",
+                btnJKnowledge: "景德鎮小知識",
+                step1: "1. 塑形",
+                step2: "2. 上釉彩繪",
+                step3: "3. 柴燒出窯",
+                step4: "4. 展覽館",
+                welcomeNameLabel: "設計師/小工匠姓名",
+                jBadge: "非物質文化遺產科普",
+                jTitle: "什麼是「景德鎮手工製瓷」？",
+                jSec1T: "世界著名的「瓷都」",
+                jSec1B: "景德鎮位於江西省，擁有超過千年的製瓷歷史！這裡製作的瓷器白如玉、明如鏡、薄如紙、聲如磬，被譽為中華文化的國寶。",
+                jSec2T: "神奇的高嶺土與72道工序",
+                jSec2B: "製作一件優雅的瓷器，要經過「採石、淘泥、拉坯、印坯、揉泥、畫彩、上釉、入窯柴燒」等共 72 道繁複的手工工序，凝結了歷代工匠的無比智慧！",
+                jSec3T: "1300°C 柴窯的「窯變驚喜」",
+                jSec3B: "在傳統柴窯中，高溫能達到 1300°C 以上！釉藥在高溫熔融流動，冷卻時會產生神秘的色彩變化（窯變）與晶瑩剔透的冰裂紋（開片）。",
+                jClose: "學到了！開始動手捏塑",
+                s1Title: "陶土塑形工具箱",
+                reset: "重置",
+                presetLabel: "選擇經典胎型",
+                pVase: "花瓶",
+                pTeapot: "茶壺",
+                pBowl: "茶碗",
+                pFigurine: "泥人",
+                clayTypeLabel: "選擇泥料種類",
+                clayRaw: "紫砂/陶泥",
+                clayTerra: "紅陶泥",
+                clayKaolin: "高嶺白泥",
+                wheelSpeed: "轆轤轉速 (Potter's Wheel)",
+                gotoPaint: "完成塑形，進入彩繪",
+                s2Title: "傳統釉彩與畫筆",
+                clear: "清除",
+                glazeStyle: "選擇彩繪釉系 (Style)",
+                palCobalt: "青花瓷",
+                palFamille: "粉彩",
+                palSancai: "唐三彩",
+                colorPick: "國畫顏料選擇",
+                baseGlaze: "底釉質感 (Base Glaze)",
+                gCeladon: "龍泉青瓷",
+                gWhite: "德化白瓷",
+                gBlack: "建盞黑釉",
+                motifs: "吉祥紋樣印章 (Motifs)",
+                brushSize: "毛筆大小 (Brush Size)",
+                unrolledView: "2D 展開繪畫圖層",
+                paintHint: "點擊印章或直接繪畫",
+                gotoKiln: "繪製完成，進入柴窯入窯",
+                firingStatus: "景德鎮傳統柴窯進火中...",
+                kilnDesc: "高溫燒製 1300°C 結晶開片中",
+                btnFire: "點火開窯 (Start Firing)",
+                factBadge: "非遺文化知識小堂",
+                factTitle: "景德鎮手工製瓷與窯變",
+                factBody: "景德鎮被譽為世界「瓷都」。入窯柴燒時，高溫超過 1300°C，陶瓷表面的釉藥在高溫下自然流動融化，產生獨一無二的「窯變」與自然的「開片（冰裂紋）」現象！這也是非物質文化遺產中最令人驚嘆的開窯驚喜。",
+                factTip: "泥人張彩塑是北方泥塑的代表，著重於活靈活現的人物表情捏塑與豐富彩繪！",
+                enterGallery: "前往精品展覽館展示作品",
+                s4Title: "大師作品展覽館",
+                sealLabel: "作者專屬落款印章 (Custom Seal)",
+                sealBtn: "落款",
+                rotateToggle: "展台 360° 自動旋轉",
+                downloadBtn: "導出高畫質作品海報 (PNG)",
+                restartBtn: "捏製一件新陶瓷",
+                watermarkTitle: "景德鎮‧典藏瓷器"
+            },
+            en: {
+                appTitle: "Master Clay & Pottery",
+                btnJKnowledge: "Jingdezhen Culture",
+                step1: "1. Sculpt",
+                step2: "2. Paint",
+                step3: "3. Kiln",
+                step4: "4. Gallery",
+                welcomeNameLabel: "Designer / Artisan Name",
+                jBadge: "Cultural Heritage Fact",
+                jTitle: "What is Jingdezhen Porcelain?",
+                jSec1T: "World Famous Porcelain Capital",
+                jSec1B: "Jingdezhen in Jiangxi province has over 1,000 years of ceramic history! Its porcelain is white as jade, bright as a mirror, and rings like a bell.",
+                jSec2T: "Kaolin Clay & 72 Handcraft Steps",
+                jSec2B: "Making fine porcelain requires 72 distinct handcraft steps—from stone mining and clay shaping to painting, glazing, and wood kiln firing!",
+                jSec3T: "1300°C Kiln Fire Transformation",
+                jSec3B: "In traditional kilns over 1300°C, liquid glazes react dynamically, creating color transformations (Kiln Shift) and crackle glazes!",
+                jClose: "Got it! Start Sculpting",
+                s1Title: "Clay Sculpting Toolbar",
+                reset: "Reset",
+                presetLabel: "Preset Pottery Shapes",
+                pVase: "Vase",
+                pTeapot: "Teapot",
+                pBowl: "Bowl",
+                pFigurine: "Figurine",
+                clayTypeLabel: "Clay Material Type",
+                clayRaw: "Raw Clay",
+                clayTerra: "Terracotta",
+                clayKaolin: "White Kaolin",
+                wheelSpeed: "Wheel Speed",
+                gotoPaint: "Done Sculpting, Start Painting",
+                s2Title: "Glaze & Digital Brush",
+                clear: "Clear",
+                glazeStyle: "Traditional Glaze Styles",
+                palCobalt: "Blue & White",
+                palFamille: "Famille Rose",
+                palSancai: "Tang Sancai",
+                colorPick: "Pigment Color Selection",
+                baseGlaze: "Base Glaze Finish",
+                gCeladon: "Celadon",
+                gWhite: "White Porcelain",
+                gBlack: "Black Iron",
+                motifs: "Traditional Stamps & Motifs",
+                brushSize: "Brush Size",
+                unrolledView: "Unrolled 2D Texture Canvas",
+                paintHint: "Stamp motif or paint on canvas",
+                gotoKiln: "Finish Painting, Enter Kiln",
+                firingStatus: "Traditional Wood Kiln Firing...",
+                kilnDesc: "Firing at 1300°C with glaze crackle effects",
+                btnFire: "Start Kiln Firing",
+                factBadge: "Cultural Heritage Fact",
+                factTitle: "Jingdezhen Porcelain & Kiln Change",
+                factBody: "Jingdezhen is known as the Porcelain Capital. During wood-firing above 1300°C, glazes liquefy and react dynamically, creating mysterious glaze color shifts and crackle textures!",
+                factTip: "Nirenzhang Clay Sculptures are famous for expressive facial features and vivid hand-painted colors!",
+                enterGallery: "View Final Artwork in Gallery",
+                s4Title: "Master Gallery Showroom",
+                sealLabel: "Custom Artist Seal Stamp",
+                sealBtn: "Stamp",
+                rotateToggle: "360° Pedestal Auto-Rotate",
+                downloadBtn: "Export Artwork Poster (PNG)",
+                restartBtn: "Create New Pottery",
+                watermarkTitle: "Jingdezhen Fine Porcelain"
+            }
+        };
+
+        function confirmDesignerName() {
+            const inputVal = document.getElementById('input-designer-name').value.trim();
+            if (inputVal) {
+                designerName = inputVal;
+            }
+            document.getElementById('seal-name').value = designerName;
+            updateSealName();
+            document.getElementById('welcome-modal').classList.add('hidden');
+            playSound('chime');
+        }
+
+        function openJingdezhenModal() {
+            document.getElementById('jingdezhen-modal').classList.remove('hidden');
+            playSound('chime');
+        }
+
+        function closeJingdezhenModal() {
+            document.getElementById('jingdezhen-modal').classList.add('hidden');
+        }
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'zh' ? 'en' : 'zh';
+            document.getElementById('lang-text').innerText = currentLang === 'zh' ? 'EN' : '繁中';
+            updateUIStrings();
+        }
+
+        function updateUIStrings() {
+            const dict = i18n[currentLang];
+            document.getElementById('txt-app-title').innerText = dict.appTitle;
+            document.getElementById('txt-btn-j-knowledge').innerText = dict.btnJKnowledge;
+            document.getElementById('txt-step-1').innerText = dict.step1;
+            document.getElementById('txt-step-2').innerText = dict.step2;
+            document.getElementById('txt-step-3').innerText = dict.step3;
+            document.getElementById('txt-step-4').innerText = dict.step4;
+            document.getElementById('txt-welcome-name-label').innerText = dict.welcomeNameLabel;
+            document.getElementById('txt-j-badge').innerText = dict.jBadge;
+            document.getElementById('txt-j-title').innerText = dict.jTitle;
+            document.getElementById('txt-j-sec1-t').innerText = dict.jSec1T;
+            document.getElementById('txt-j-sec1-b').innerText = dict.jSec1B;
+            document.getElementById('txt-j-sec2-t').innerText = dict.jSec2T;
+            document.getElementById('txt-j-sec2-b').innerText = dict.jSec2B;
+            document.getElementById('txt-j-sec3-t').innerText = dict.jSec3T;
+            document.getElementById('txt-j-sec3-b').innerText = dict.jSec3B;
+            document.getElementById('txt-j-close').innerText = dict.jClose;
+            document.getElementById('txt-s1-title').innerText = dict.s1Title;
+            document.getElementById('txt-reset').innerText = dict.reset;
+            document.getElementById('txt-preset-label').innerText = dict.presetLabel;
+            document.getElementById('txt-p-vase').innerText = dict.pVase;
+            document.getElementById('txt-p-teapot').innerText = dict.pTeapot;
+            document.getElementById('txt-p-bowl').innerText = dict.pBowl;
+            document.getElementById('txt-p-figurine').innerText = dict.pFigurine;
+            document.getElementById('txt-claytype-label').innerText = dict.clayTypeLabel;
+            document.getElementById('txt-clay-raw').innerText = dict.clayRaw;
+            document.getElementById('txt-clay-terra').innerText = dict.clayTerra;
+            document.getElementById('txt-clay-kaolin').innerText = dict.clayKaolin;
+            document.getElementById('txt-wheelspeed').innerText = dict.wheelSpeed;
+            document.getElementById('txt-goto-paint').innerText = dict.gotoPaint;
+            document.getElementById('txt-s2-title').innerText = dict.s2Title;
+            document.getElementById('txt-clear').innerText = dict.clear;
+            document.getElementById('txt-glaze-style').innerText = dict.glazeStyle;
+            document.getElementById('txt-pal-cobalt').innerText = dict.palCobalt;
+            document.getElementById('txt-pal-famille').innerText = dict.palFamille;
+            document.getElementById('txt-pal-sancai').innerText = dict.palSancai;
+            document.getElementById('txt-color-pick').innerText = dict.colorPick;
+            document.getElementById('txt-base-glaze').innerText = dict.baseGlaze;
+            document.getElementById('txt-g-celadon').innerText = dict.gCeladon;
+            document.getElementById('txt-g-white').innerText = dict.gWhite;
+            document.getElementById('txt-g-black').innerText = dict.gBlack;
+            document.getElementById('txt-motifs').innerText = dict.motifs;
+            document.getElementById('txt-brush-size').innerText = dict.brushSize;
+            document.getElementById('txt-unrolled-view').innerText = dict.unrolledView;
+            document.getElementById('txt-paint-hint').innerText = dict.paintHint;
+            document.getElementById('txt-goto-kiln').innerText = dict.gotoKiln;
+            document.getElementById('txt-firing-status').innerText = dict.firingStatus;
+            document.getElementById('txt-kiln-desc').innerText = dict.kilnDesc;
+            document.getElementById('txt-btn-fire').innerText = dict.btnFire;
+            document.getElementById('txt-fact-badge').innerText = dict.factBadge;
+            document.getElementById('fact-title').innerText = dict.factTitle;
+            document.getElementById('fact-body').innerText = dict.factBody;
+            document.getElementById('fact-tip').innerText = dict.factTip;
+            document.getElementById('txt-enter-gallery').innerText = dict.enterGallery;
+            document.getElementById('txt-s4-title').innerText = dict.s4Title;
+            document.getElementById('txt-seal-label').innerText = dict.sealLabel;
+            document.getElementById('txt-seal-btn').innerText = dict.sealBtn;
+            document.getElementById('txt-rotate-toggle').innerText = dict.rotateToggle;
+            document.getElementById('txt-download-btn').innerText = dict.downloadBtn;
+            document.getElementById('txt-restart-btn').innerText = dict.restartBtn;
+            document.getElementById('txt-watermark-title').innerText = dict.watermarkTitle;
+        }
+
+        /* ===================================================================
+           2. SOUND SYNTHESIZER
+           =================================================================== */
+        let audioCtx = null;
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(type) {
+            if (!audioEnabled) return;
+            initAudio();
+            if (!audioCtx) return;
+
+            const now = audioCtx.currentTime;
+            if (type === 'wheel') {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(120, now);
+                gain.gain.setValueAtTime(0.04, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(now + 0.25);
+            } else if (type === 'chime') {
+                [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+                    gain.gain.setValueAtTime(0.12, now + idx * 0.08);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.6);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now + idx * 0.08);
+                    osc.stop(now + idx * 0.08 + 0.6);
+                });
+            } else if (type === 'fire') {
+                const bufferSize = audioCtx.sampleRate * 0.4;
+                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = Math.random() * 2 - 1;
+                }
+                const noise = audioCtx.createBufferSource();
+                noise.buffer = buffer;
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'bandpass';
+                filter.frequency.setValueAtTime(800, now);
+                const gain = audioCtx.createGain();
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.linearRampToValueAtTime(0.001, now + 0.4);
+                noise.connect(filter);
+                filter.connect(gain);
+                gain.connect(audioCtx.destination);
+                noise.start();
+            }
+        }
+
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            const icon = document.getElementById('audio-icon');
+            if (audioEnabled) {
+                icon.className = "fa-solid fa-volume-high text-emerald-600";
+            } else {
+                icon.className = "fa-solid fa-volume-xmark text-gray-400";
+            }
+        }
+
+        /* ===================================================================
+           3. THREE.JS 3D POTTERY ENGINE
+           =================================================================== */
+        let scene, camera, renderer, potteryMesh, wheelPedestal;
+        let textureCanvas, textureCtx, canvasTexture;
+        let points = [];
+        const numPoints = 12;
+        const baseHeight = 4.0;
+        let wheelSpeed = 0.01;
+        let activeClayColor = 0xD97706;
+
+        const presets = {
+            vase: [0.8, 1.2, 1.5, 1.4, 1.0, 0.7, 0.6, 0.8, 1.1, 1.0, 0.7, 0.5],
+            teapot: [0.9, 1.4, 1.8, 2.0, 1.9, 1.6, 1.2, 0.9, 0.8, 0.9, 0.6, 0.2],
+            bowl: [0.7, 1.1, 1.5, 1.8, 2.1, 2.3, 2.4, 2.4, 2.3, 2.2, 2.0, 1.8],
+            figurine: [1.2, 1.4, 1.3, 1.1, 0.9, 1.2, 1.4, 1.3, 1.0, 0.8, 0.6, 0.3]
+        };
+
+        function init3D() {
+            const container = document.getElementById('canvas-3d-container');
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x382A3F);
+
+            camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+            camera.position.set(0, 2.5, 7.5);
+            camera.lookAt(0, 0.8, 0);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(renderer.domElement);
+
+            const ambientLight = new THREE.AmbientLight(0xFFFAF0, 0.8);
+            scene.add(ambientLight);
+
+            const mainLight = new THREE.DirectionalLight(0xFFF5E6, 1.3);
+            mainLight.position.set(5, 8, 5);
+            mainLight.castShadow = true;
+            scene.add(mainLight);
+
+            const fillLight = new THREE.DirectionalLight(0xBAE6FD, 0.5);
+            fillLight.position.set(-5, 3, -5);
+            scene.add(fillLight);
+
+            const wheelGeo = new THREE.CylinderGeometry(2.6, 2.8, 0.4, 32);
+            const wheelMat = new THREE.MeshStandardMaterial({ color: 0x854D0E, roughness: 0.7 });
+            wheelPedestal = new THREE.Mesh(wheelGeo, wheelMat);
+            wheelPedestal.position.y = -0.2;
+            wheelPedestal.receiveShadow = true;
+            scene.add(wheelPedestal);
+
+            const floorGeo = new THREE.PlaneGeometry(30, 30);
+            const floorMat = new THREE.MeshStandardMaterial({ color: 0x1E1B18, roughness: 0.9 });
+            const floor = new THREE.Mesh(floorGeo, floorMat);
+            floor.rotation.x = -Math.PI / 2;
+            floor.position.y = -0.4;
+            floor.receiveShadow = true;
+            scene.add(floor);
+
+            initPaintCanvas();
+            initProfilePoints('vase');
+            rebuildPotteryMesh();
+
+            window.addEventListener('resize', onWindowResize);
+            animate();
+        }
+
+        function initPaintCanvas() {
+            textureCanvas = document.getElementById('texture-canvas');
+            textureCtx = textureCanvas.getContext('2d');
+            clearPaintCanvas();
+
+            canvasTexture = new THREE.CanvasTexture(textureCanvas);
+            canvasTexture.wrapS = THREE.RepeatWrapping;
+            canvasTexture.wrapT = THREE.ClampToEdgeWrapping;
+        }
+
+        function clearPaintCanvas() {
+            if (!textureCtx) return;
+            textureCtx.fillStyle = '#FEF08A';
+            textureCtx.fillRect(0, 0, textureCanvas.width, textureCanvas.height);
+
+            textureCtx.strokeStyle = 'rgba(217, 119, 6, 0.15)';
+            textureCtx.lineWidth = 1;
+            for (let i = 0; i < textureCanvas.width; i += 64) {
+                textureCtx.beginPath();
+                textureCtx.moveTo(i, 0);
+                textureCtx.lineTo(i, textureCanvas.height);
+                textureCtx.stroke();
+            }
+            if (canvasTexture) canvasTexture.needsUpdate = true;
+        }
+
+        function initProfilePoints(presetKey) {
+            const radList = presets[presetKey] || presets.vase;
+            points = [];
+            for (let i = 0; i < numPoints; i++) {
+                const y = (i / (numPoints - 1)) * baseHeight;
+                const r = radList[i];
+                points.push(new THREE.Vector2(r, y));
+            }
+        }
+
+        function rebuildPotteryMesh() {
+            if (potteryMesh) {
+                scene.remove(potteryMesh);
+                potteryMesh.geometry.dispose();
+            }
+
+            const geometry = new THREE.LatheGeometry(points, 48);
+            const material = new THREE.MeshStandardMaterial({
+                map: canvasTexture,
+                roughness: currentStage >= 3 ? 0.15 : 0.65,
+                metalness: currentStage === 4 ? 0.1 : 0.05,
+                color: activeClayColor,
+                side: THREE.DoubleSide
+            });
+
+            potteryMesh = new THREE.Mesh(geometry, material);
+            potteryMesh.castShadow = true;
+            potteryMesh.receiveShadow = true;
+            scene.add(potteryMesh);
+
+            updateSculptHandlesDOM();
+        }
+
+        function applyPreset(key) {
+            initProfilePoints(key);
+            rebuildPotteryMesh();
+            playSound('wheel');
+        }
+
+        function resetClayShape() {
+            applyPreset('vase');
+        }
+
+        function setClayMaterial(type) {
+            const btns = document.querySelectorAll('.clay-mat-btn');
+            btns.forEach(b => {
+                b.classList.remove('bg-amber-700', 'text-white', 'border-amber-300');
+                b.classList.add('bg-white', 'text-amber-900', 'border-transparent');
+            });
+
+            if (type === 'raw') {
+                activeClayColor = 0xD97706;
+            } else if (type === 'terracotta') {
+                activeClayColor = 0xE11D48;
+            } else if (type === 'kaolin') {
+                activeClayColor = 0xFEF08A;
+            }
+            if (potteryMesh) potteryMesh.material.color.setHex(activeClayColor);
+            playSound('wheel');
+        }
+
+        function updateWheelSpeed(val) {
+            wheelSpeed = (val / 100) * 0.04;
+            document.getElementById('speed-val').innerText = val + '%';
+        }
+
+        function updateSculptHandlesDOM() {
+            const container = document.getElementById('sculpt-handles-container');
+            const pathEl = document.getElementById('profile-path');
+            const pathSymEl = document.getElementById('profile-path-sym');
+            container.innerHTML = '';
+
+            if (currentStage !== 1) {
+                pathEl.setAttribute('d', '');
+                pathSymEl.setAttribute('d', '');
+                return;
+            }
+
+            const canvasContainer = document.getElementById('canvas-3d-container');
+            const width = canvasContainer.clientWidth;
+            const height = canvasContainer.clientHeight;
+
+            let pathD = "";
+            let pathSymD = "";
+
+            points.forEach((pt, index) => {
+                const v3d = new THREE.Vector3(pt.x, pt.y, 0);
+                v3d.project(camera);
+
+                const x = (v3d.x * 0.5 + 0.5) * width;
+                const y = (-(v3d.y * 0.5) + 0.5) * height;
+
+                const v3dSym = new THREE.Vector3(-pt.x, pt.y, 0);
+                v3dSym.project(camera);
+                const xSym = (v3dSym.x * 0.5 + 0.5) * width;
+
+                if (index === 0) {
+                    pathD += `M ${x} ${y}`;
+                    pathSymD += `M ${xSym} ${y}`;
+                } else {
+                    pathD += ` L ${x} ${y}`;
+                    pathSymD += ` L ${xSym} ${y}`;
+                }
+
+                const handle = document.createElement('div');
+                handle.className = 'sculpt-handle btn-pop absolute w-6 h-6 -ml-3 -mt-3 bg-amber-400 hover:bg-rose-500 border-2 border-white rounded-full shadow-lg cursor-ew-resize flex items-center justify-center text-[10px] text-amber-950 font-bold';
+                handle.style.left = `${x}px`;
+                handle.style.top = `${y}px`;
+                handle.innerText = index + 1;
+
+                attachDragEvents(handle, index);
+                container.appendChild(handle);
+            });
+
+            pathEl.setAttribute('d', pathD);
+            pathSymEl.setAttribute('d', pathSymD);
+        }
+
+        function attachDragEvents(handle, pointIndex) {
+            let isDragging = false;
+
+            const onStart = (e) => {
+                isDragging = true;
+                handle.classList.add('bg-rose-600', 'scale-125');
+                e.stopPropagation();
+            };
+
+            const onMove = (e) => {
+                if (!isDragging) return;
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const canvasContainer = document.getElementById('canvas-3d-container');
+                const rect = canvasContainer.getBoundingClientRect();
+                
+                const normalizedX = ((clientX - rect.left) / rect.width) * 2 - 1;
+                let newRadius = Math.max(0.2, Math.min(3.0, normalizedX * 3.5));
+                points[pointIndex].x = newRadius;
+
+                rebuildPotteryMesh();
+                playSound('wheel');
+            };
+
+            const onEnd = () => {
+                if (isDragging) {
+                    isDragging = false;
+                    handle.classList.remove('bg-rose-600', 'scale-125');
+                }
+            };
+
+            handle.addEventListener('mousedown', onStart);
+            window.addEventListener('mousemove', onMove);
+            window.addEventListener('mouseup', onEnd);
+
+            handle.addEventListener('touchstart', onStart);
+            window.addEventListener('touchmove', onMove);
+            window.addEventListener('touchend', onEnd);
+        }
+
+        function onWindowResize() {
+            const container = document.getElementById('canvas-3d-container');
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            updateSculptHandlesDOM();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (potteryMesh && (currentStage === 1 || currentStage === 4)) {
+                potteryMesh.rotation.y += wheelSpeed;
+                if (wheelPedestal) wheelPedestal.rotation.y += wheelSpeed;
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        /* ===================================================================
+           4. STAGE 2: GLAZE & CANVAS PAINTING (FIXED VECTOR DRAGON & MOTIFS)
+           =================================================================== */
+        let activeColor = '#2563EB';
+        let brushSize = 12;
+        let isPainting = false;
+        let activeMotif = null;
+
+        const palettes = {
+            blue_white: ['#2563EB', '#1E40AF', '#1D4ED8', '#60A5FA', '#EFF6FF'],
+            famille_rose: ['#EC4899', '#E11D48', '#F97316', '#10B981', '#F59E0B'],
+            sancai: ['#B45309', '#EA580C', '#059669', '#D97706', '#FBBF24']
+        };
+
+        function setPalette(styleKey) {
+            const btns = document.querySelectorAll('.palette-btn');
+            btns.forEach(b => b.classList.replace('border-sky-500', 'border-transparent'));
+
+            const container = document.getElementById('color-palette-container');
+            container.innerHTML = '';
+
+            const colors = palettes[styleKey] || palettes.blue_white;
+            activeColor = colors[0];
+
+            colors.forEach((c, idx) => {
+                const dot = document.createElement('button');
+                dot.className = `btn-pop w-8 h-8 rounded-full border-2 border-white shadow-md ${idx === 0 ? 'ring-2 ring-sky-800 scale-110' : ''}`;
+                dot.style.backgroundColor = c;
+                dot.onclick = () => {
+                    document.querySelectorAll('#color-palette-container button').forEach(b => b.classList.remove('ring-2', 'ring-sky-800', 'scale-110'));
+                    dot.classList.add('ring-2', 'ring-sky-800', 'scale-110');
+                    activeColor = c;
+                    activeMotif = null;
+                };
+                container.appendChild(dot);
+            });
+            playSound('chime');
+        }
+
+        function setBaseGlaze(glazeType) {
+            if (glazeType === 'celadon') {
+                activeClayColor = 0x10B981;
+            } else if (glazeType === 'white') {
+                activeClayColor = 0xF8FAFC;
+            } else if (glazeType === 'black') {
+                activeClayColor = 0x1E293B;
+            }
+            if (potteryMesh) potteryMesh.material.color.setHex(activeClayColor);
+            playSound('chime');
+        }
+
+        function updateBrushSize(val) {
+            brushSize = parseInt(val);
+            document.getElementById('brush-size-val').innerText = val + 'px';
+        }
+
+        function selectMotif(type) {
+            activeMotif = type;
+            playSound('chime');
+        }
+
+        function setupCanvasPainter() {
+            setPalette('blue_white');
+
+            const getPos = (e) => {
+                const rect = textureCanvas.getBoundingClientRect();
+                const scaleX = textureCanvas.width / rect.width;
+                const scaleY = textureCanvas.height / rect.height;
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return {
+                    x: (clientX - rect.left) * scaleX,
+                    y: (clientY - rect.top) * scaleY
+                };
+            };
+
+            const startPaint = (e) => {
+                isPainting = true;
+                const pos = getPos(e);
+
+                if (activeMotif) {
+                    drawArtisticVectorMotif(pos.x, pos.y, activeMotif);
+                } else {
+                    textureCtx.beginPath();
+                    textureCtx.moveTo(pos.x, pos.y);
+                }
+            };
+
+            const drawPaint = (e) => {
+                if (!isPainting || activeMotif) return;
+                const pos = getPos(e);
+                textureCtx.lineTo(pos.x, pos.y);
+                textureCtx.strokeStyle = activeColor;
+                textureCtx.lineWidth = brushSize;
+                textureCtx.lineCap = 'round';
+                textureCtx.lineJoin = 'round';
+                textureCtx.stroke();
+                if (canvasTexture) canvasTexture.needsUpdate = true;
+            };
+
+            const stopPaint = () => {
+                if (isPainting) {
+                    isPainting = false;
+                    if (canvasTexture) canvasTexture.needsUpdate = true;
+                }
+            };
+
+            textureCanvas.addEventListener('mousedown', startPaint);
+            textureCanvas.addEventListener('mousemove', drawPaint);
+            window.addEventListener('mouseup', stopPaint);
+
+            textureCanvas.addEventListener('touchstart', startPaint);
+            textureCanvas.addEventListener('touchmove', drawPaint);
+            window.addEventListener('touchend', stopPaint);
+        }
+
+        /* DRAW DETAILED VECTOR GRAPHIC MOTIFS INSTEAD OF PLAIN TEXT */
+        function drawArtisticVectorMotif(x, y, type) {
+            textureCtx.save();
+            textureCtx.translate(x, y);
+            textureCtx.fillStyle = activeColor;
+            textureCtx.strokeStyle = activeColor;
+            textureCtx.lineWidth = 3;
+            textureCtx.lineCap = 'round';
+            textureCtx.lineJoin = 'round';
+
+            if (type === 'dragon') {
+                // 🐉 Detailed Chinese Dragon Pattern (Body, Head, Whiskers, Claws)
+                textureCtx.beginPath();
+                // S-Curve Dragon Body
+                textureCtx.moveTo(-35, 10);
+                textureCtx.bezierCurveTo(-20, -25, 0, 25, 20, -10);
+                textureCtx.bezierCurveTo(28, -20, 35, -5, 30, 10);
+                textureCtx.lineWidth = 6;
+                textureCtx.stroke();
+
+                // Dragon Head
+                textureCtx.beginPath();
+                textureCtx.arc(30, 10, 8, 0, Math.PI * 2);
+                textureCtx.fill();
+
+                // Whiskers & Horns
+                textureCtx.lineWidth = 2.5;
+                textureCtx.beginPath();
+                textureCtx.moveTo(34, 6);
+                textureCtx.lineTo(44, 2);
+                textureCtx.moveTo(34, 12);
+                textureCtx.lineTo(45, 16);
+                // Back Spikes
+                textureCtx.moveTo(-20, -10); textureCtx.lineTo(-18, -18);
+                textureCtx.moveTo(-5, 8); textureCtx.lineTo(-3, 16);
+                textureCtx.moveTo(10, -5); textureCtx.lineTo(12, -13);
+                textureCtx.stroke();
+            } else if (type === 'cloud') {
+                // ☁️ Traditional Lucky Cloud Scroll
+                textureCtx.beginPath();
+                textureCtx.arc(-12, 0, 10, Math.PI * 0.5, Math.PI * 1.8);
+                textureCtx.arc(0, -10, 12, Math.PI * 1.0, Math.PI * 2.1);
+                textureCtx.arc(14, 0, 9, Math.PI * 1.2, Math.PI * 2.5);
+                textureCtx.stroke();
+                textureCtx.beginPath();
+                textureCtx.moveTo(-15, 8);
+                textureCtx.quadraticCurveTo(0, 15, 18, 8);
+                textureCtx.stroke();
+            } else if (type === 'lotus') {
+                // 🪷 Chinese Porcelain Lotus Flower
+                for (let i = -2; i <= 2; i++) {
+                    textureCtx.beginPath();
+                    textureCtx.ellipse(i * 8, -5, 7, 18, (i * Math.PI) / 12, 0, Math.PI * 2);
+                    textureCtx.fill();
+                }
+                // Base Pad
+                textureCtx.beginPath();
+                textureCtx.arc(0, 12, 14, Math.PI, 0);
+                textureCtx.stroke();
+            } else if (type === 'fish') {
+                // 🐟 Carp / Fish Pair
+                textureCtx.beginPath();
+                textureCtx.ellipse(-10, -5, 16, 8, -Math.PI / 6, 0, Math.PI * 2);
+                textureCtx.fill();
+                // Tail
+                textureCtx.beginPath();
+                textureCtx.moveTo(-22, -10);
+                textureCtx.lineTo(-32, -18);
+                textureCtx.lineTo(-28, -5);
+                textureCtx.fill();
+            } else if (type === 'flower') {
+                // 🌸 Plum Blossom
+                for (let i = 0; i < 5; i++) {
+                    textureCtx.rotate((Math.PI * 2) / 5);
+                    textureCtx.beginPath();
+                    textureCtx.arc(0, -12, 8, 0, Math.PI * 2);
+                    textureCtx.fill();
+                }
+            }
+
+            textureCtx.restore();
+            if (canvasTexture) canvasTexture.needsUpdate = true;
+        }
+
+        /* ===================================================================
+           5. STAGE 3: KILN FIRING
+           =================================================================== */
+        let fireAnimationId = null;
+
+        function runKilnFiringSequence() {
+            document.getElementById('start-fire-btn').classList.add('hidden');
+            let temp = 25;
+            const tempEl = document.getElementById('kiln-temp');
+
+            startFireParticles();
+
+            const interval = setInterval(() => {
+                temp += 210;
+                if (temp > 1300) temp = 1300;
+                tempEl.innerText = temp;
+
+                playSound('fire');
+
+                if (temp >= 1300) {
+                    clearInterval(interval);
+                    applyKilnCrackleEffect();
+
+                    setTimeout(() => {
+                        stopFireParticles();
+                        document.getElementById('kiln-overlay').classList.add('hidden');
+                        showFactModal();
+                    }, 1000);
+                }
+            }, 700);
+        }
+
+        function startFireParticles() {
+            const canvas = document.getElementById('fire-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.clientWidth;
+            canvas.height = canvas.clientHeight;
+
+            const particles = [];
+            for (let i = 0; i < 60; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: canvas.height + Math.random() * 50,
+                    r: Math.random() * 12 + 4,
+                    vy: Math.random() * 4 + 2,
+                    color: `hsl(${Math.random() * 40 + 10}, 100%, 50%)`
+                });
+            }
+
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach(p => {
+                    p.y -= p.vy;
+                    if (p.y < -10) p.y = canvas.height + 10;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    ctx.fillStyle = p.color;
+                    ctx.globalAlpha = 0.6;
+                    ctx.fill();
+                });
+                fireAnimationId = requestAnimationFrame(draw);
+            }
+            draw();
+        }
+
+        function stopFireParticles() {
+            if (fireAnimationId) cancelAnimationFrame(fireAnimationId);
+        }
+
+        function applyKilnCrackleEffect() {
+            textureCtx.strokeStyle = 'rgba(245, 158, 11, 0.5)';
+            textureCtx.lineWidth = 1;
+            for (let i = 0; i < 30; i++) {
+                textureCtx.beginPath();
+                let x = Math.random() * textureCanvas.width;
+                let y = Math.random() * textureCanvas.height;
+                textureCtx.moveTo(x, y);
+                for (let j = 0; j < 4; j++) {
+                    x += (Math.random() - 0.5) * 60;
+                    y += (Math.random() - 0.5) * 60;
+                    textureCtx.lineTo(x, y);
+                }
+                textureCtx.stroke();
+            }
+            if (canvasTexture) canvasTexture.needsUpdate = true;
+            if (potteryMesh) potteryMesh.material.roughness = 0.15;
+        }
+
+        function showFactModal() {
+            const modal = document.getElementById('fact-modal');
+            const card = document.getElementById('fact-card');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                card.classList.remove('scale-95', 'opacity-0');
+                card.classList.add('scale-100', 'opacity-100');
+            }, 50);
+            playSound('chime');
+        }
+
+        function closeFactModalAndShowroom() {
+            const modal = document.getElementById('fact-modal');
+            modal.classList.add('hidden');
+            switchStage(4);
+        }
+
+        /* ===================================================================
+           6. STAGE 4: GALLERY SHOWROOM & PNG EXPORT
+           =================================================================== */
+        function updateSealName() {
+            designerName = document.getElementById('seal-name').value || '陳小明';
+            document.getElementById('seal-text-display').innerText = designerName + '印';
+            playSound('chime');
+        }
+
+        function toggleAutoRotate(enabled) {
+            wheelSpeed = enabled ? 0.01 : 0;
+        }
+
+        function downloadSnapshot() {
+            playSound('chime');
+            renderer.render(scene, camera);
+            const dataUrl = renderer.domElement.toDataURL('image/png');
+
+            const expCanvas = document.createElement('canvas');
+            expCanvas.width = 1200;
+            expCanvas.height = 900;
+            const ctx = expCanvas.getContext('2d');
+
+            const img = new Image();
+            img.onload = () => {
+                ctx.fillStyle = '#111827';
+                ctx.fillRect(0, 0, 1200, 900);
+
+                ctx.drawImage(img, 0, 0, 1200, 900);
+
+                ctx.fillStyle = '#F59E0B';
+                ctx.font = '900 42px "Noto Serif TC", serif';
+                ctx.fillText(i18n[currentLang].appTitle, 60, 80);
+
+                // Designer Watermark on Poster
+                ctx.fillStyle = '#FFFFFF';
+                ctx.font = 'bold 24px "Noto Serif TC", serif';
+                ctx.fillText('黃老師設計', 60, 840);
+
+                ctx.strokeStyle = '#DC2626';
+                ctx.lineWidth = 6;
+                ctx.strokeRect(1060, 60, 80, 200);
+
+                ctx.fillStyle = '#DC2626';
+                ctx.font = '900 32px "Noto Serif TC", serif';
+                const nameStr = (document.getElementById('seal-name').value || '陳小明') + '印';
+                for (let i = 0; i < nameStr.length; i++) {
+                    ctx.fillText(nameStr[i], 1082, 110 + i * 42);
+                }
+
+                const link = document.createElement('a');
+                link.download = `pottery_artwork_${Date.now()}.png`;
+                link.href = expCanvas.toDataURL('image/png');
+                link.click();
+            };
+            img.src = dataUrl;
+        }
+
+        /* ===================================================================
+           7. STAGE SWITCHING PIPELINE
+           =================================================================== */
+        function switchStage(stageNum) {
+            currentStage = stageNum;
+
+            document.querySelectorAll('.stage-nav-btn').forEach((btn, idx) => {
+                if (idx + 1 === stageNum) {
+                    btn.className = "stage-nav-btn btn-pop px-2.5 py-1 md:px-3 md:py-1.5 rounded-lg text-xs md:text-xs font-bold flex items-center space-x-1 transition-all bg-rose-500 text-white shadow-sm whitespace-nowrap";
+                } else {
+                    btn.className = "stage-nav-btn btn-pop px-2.5 py-1 md:px-3 md:py-1.5 rounded-lg text-xs md:text-xs font-bold flex items-center space-x-1 transition-all text-amber-900 hover:bg-amber-200/80 whitespace-nowrap";
+                }
+            });
+
+            document.querySelectorAll('.stage-panel').forEach(p => p.classList.add('hidden'));
+            document.getElementById('kiln-overlay').classList.add('hidden');
+            document.getElementById('gallery-watermark').classList.add('hidden');
+
+            if (stageNum === 1) {
+                document.getElementById('panel-stage-1').classList.remove('hidden');
+                wheelSpeed = 0.01;
+                camera.position.set(0, 2.5, 7.5);
+                camera.lookAt(0, 0.8, 0);
+            } else if (stageNum === 2) {
+                document.getElementById('panel-stage-2').classList.remove('hidden');
+                wheelSpeed = 0;
+                camera.position.set(0, 2.0, 6.5);
+                camera.lookAt(0, 1.2, 0);
+            } else if (stageNum === 3) {
+                document.getElementById('kiln-overlay').classList.remove('hidden');
+                document.getElementById('start-fire-btn').classList.remove('hidden');
+            } else if (stageNum === 4) {
+                document.getElementById('panel-stage-4').classList.remove('hidden');
+                document.getElementById('gallery-watermark').classList.remove('hidden');
+                wheelSpeed = 0.01;
+                camera.position.set(0, 3.0, 8.5);
+                camera.lookAt(0, 1.0, 0);
+            }
+
+            updateSculptHandlesDOM();
+            playSound('chime');
+        }
+
+        window.onload = () => {
+            init3D();
+            setupCanvasPainter();
+            updateUIStrings();
+        };
+    </script>
+</body>
+</html>
